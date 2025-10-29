@@ -3,6 +3,9 @@
     "draftMessages": true
   },
   "requires": {
-    "db": "hana"
+    "db": "hana",
+    "[hybrid]": {
+      "auth": "xsuaa"
+    }
   }
 }
