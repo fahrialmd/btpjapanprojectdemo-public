@@ -8,8 +8,7 @@ import com.sap.cds.services.handler.annotations.ServiceName;
 
 import cds.gen.mainservice.MainService_;
 import cds.gen.mainservice.POMapping;
-import cds.gen.mainservice.POMappingStartReplicatingPOContext;
-import cds.gen.mainservice.POMapping_;
+import cds.gen.mainservice.StartReplicatingPOContext;
 import customer.btpjapanprojectdemo.service.POMappingService;
 
 @Component
@@ -22,8 +21,8 @@ public class MainServicePOMappingHandler implements EventHandler {
         this.poMappingService = poMappingService;
     }
 
-    @On(entity = POMapping_.CDS_NAME, event = POMappingStartReplicatingPOContext.CDS_NAME)
-    public void onStartReplicatingPO(POMappingStartReplicatingPOContext context) {
+    @On(event = StartReplicatingPOContext.CDS_NAME)
+    public void onStartReplicatingPO(StartReplicatingPOContext context) {
         POMapping result = poMappingService.startReplicatingPO(context);
         context.getMessages().success("PO Replicated");
         context.setResult(result);

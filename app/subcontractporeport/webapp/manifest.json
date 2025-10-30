@@ -127,6 +127,13 @@
                 "@com.sap.vocabularies.UI.v1.LineItem": {
                   "tableSettings": {
                     "type": "ResponsiveTable"
+                  },
+                  "actions": {
+                    "DataFieldForAction::MainService.startReplicatingPO": {
+                      "afterExecution": {
+                        "enableAutoScroll": true
+                      }
+                    }
                   }
                 }
               }
