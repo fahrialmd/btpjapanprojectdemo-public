@@ -8,12 +8,15 @@ using {
 } from '@sap/cds/common';
 
 entity POMapping : cuid, managed {
-    company_code : String(40);
-    po_number    : String(40);
-    item         : String(40);
+    original_po      : String(10);
+    original_po_item : String(5);
+    replica_po       : String(10);
+    replica_po_item  : String(5);
+    company_code     : String(4);
+    supplier         : String(10);
 }
 
-entity GoodsMovementLog : cuid, managed {
+entity GoodsMovementLog : cuid, managed {   
     po_number    : String(40);
     material_doc : String(40);
     timestamp    : String(40);
