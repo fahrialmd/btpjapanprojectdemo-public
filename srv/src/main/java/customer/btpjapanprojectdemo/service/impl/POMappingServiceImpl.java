@@ -1,6 +1,7 @@
 package customer.btpjapanprojectdemo.service.impl;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,19 +19,23 @@ import customer.btpjapanprojectdemo.service.POMappingService;
 public class POMappingServiceImpl implements POMappingService {
 
     private final RestTemplate restTemplate;
+    private final GenericCqnService genericCqnService;
 
-    public POMappingServiceImpl() {
+    public POMappingServiceImpl(GenericCqnService genericCqnService) {
         this.restTemplate = createRestTemplate();
+        this.genericCqnService = genericCqnService;
     }
 
     @Override
     public POMapping startReplicatingPO(StartReplicatingPOContext context) {
 
-        POMapping testvar;
+        // 1. Get all processed po number
+        List<String> originalPO = genericCqnService.getPOMappingOriginalIds();
 
-        // 1. Get all unprocessed subcontract po item number
+        // 2. Get all unprocessed subcontract po number
         getSubcontractPOItem();
-        // 2.
+
+        // 3.
 
         return null;
     }
