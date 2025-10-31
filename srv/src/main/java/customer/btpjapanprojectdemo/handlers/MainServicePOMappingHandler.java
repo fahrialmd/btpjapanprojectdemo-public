@@ -25,6 +25,7 @@ public class MainServicePOMappingHandler implements EventHandler {
     public void onStartReplicatingPO(StartReplicatingPOContext context) {
         POMapping result = poMappingService.startReplicatingPO(context);
         context.getMessages().success("PO Replicated");
-        context.setResult(result);
+        context.setCompleted();
+        // context.setResult(result);
     }
 }
