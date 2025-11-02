@@ -127,12 +127,17 @@
                 "@com.sap.vocabularies.UI.v1.LineItem": {
                   "tableSettings": {
                     "type": "ResponsiveTable"
-                  },
+                  }
+                }
+              },
+              "content": {
+                "header": {
                   "actions": {
-                    "DataFieldForAction::MainService.startReplicatingPO": {
-                      "afterExecution": {
-                        "enableAutoScroll": true
-                      }
+                    "startReplicateSubcontractPo": {
+                      "press": "subcontractporeport.ext.controller.Custom.startReplicateSubcontractPo",
+                      "visible": true,
+                      "enabled": true,
+                      "text": "{i18n>replicatePo}"
                     }
                   }
                 }

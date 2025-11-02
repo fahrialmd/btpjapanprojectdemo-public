@@ -1,7 +1,6 @@
 package customer.btpjapanprojectdemo.service.impl;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,97 +32,103 @@ public class POMappingServiceImpl implements POMappingService {
     private final ObjectMapper objectMapper;
     private String csrfToken = null;
     private String cookies = null;
+    private final SAPCloudODataClient sapCloudODataClient;
 
-    public POMappingServiceImpl(GenericCqnService genericCqnService) {
-        // Configure RestTemplate with UTF-8
+    public POMappingServiceImpl(GenericCqnService genericCqnService, SAPCloudODataClient sapCloudODataClient) {
         this.restTemplate = new RestTemplate();
-        this.restTemplate.getMessageConverters()
-                .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-
+        this.restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
         this.genericCqnService = genericCqnService;
-
-        // Configure ObjectMapper with UTF-8 (single instance)
         this.objectMapper = new ObjectMapper();
         this.objectMapper.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, false);
+        this.sapCloudODataClient = sapCloudODataClient;
     }
 
     @Override
     public POMapping startReplicatingPO(StartReplicatingPOContext context) {
 
         // 1. Get all replicated PO number
-        JsonNode mappedPONumbers = genericCqnService.getPOHeaderItemOriginalIds();
+        JsonNode mappedPoNumbers = genericCqnService.getPOHeaderItemOriginalIds();
 
-        // 2. Create filter to get unreplicated PO Number
-        StringBuilder filterCondition = new StringBuilder("PurchaseOrderItemCategory eq '3'");
-        if (mappedPONumbers.size() > 0) {
-            filterCondition.append(" and not (");
-            boolean first = true;
-            for (JsonNode node : mappedPONumbers) {
-                String po = node.get(POMapping.ORIGINAL_PO).asText();
-                String item = node.get(POMapping.ORIGINAL_PO_ITEM).asText();
-                if (!first) {
-                    filterCondition.append(" or ");
-                }
-                filterCondition.append("PurchaseOrder eq '").append(po).append("'")
-                        .append(" and PurchaseOrderItem eq '").append(item).append("'");
-                first = false;
-            }
-            filterCondition.append(")");
-        }
-
-        // 3. Get all unreplicated PO number
-        List<String> queryParams1 = Arrays.asList(
-                "$filter=" + filterCondition.toString(),
-                "$select=PurchaseOrder,PurchaseOrderItem");
-        JsonNode allPONumbers = executeRequest(
+        JsonNode allPoNumbers = sapCloudODataClient.executeRequest(
                 HttpMethod.GET,
                 "https://my200132.s4hana.sapcloud.cn/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrderItem",
-                "Basic U1VCUE9fNDc4MjU6JmhTa0Bbdm82LWsyU0R2Vm5ZW2RaLTVmVldNKXJ4UyhkXGtrRkt0Uw==",
-                queryParams1,
-                "",
-                "",
-                "");
+                null,
+                SAPCloudODataClient.SAPCommUser.PURCHASE_ORDER);
 
-        // 4. Replicate the PO
-        List<String> queryParams2 = Arrays.asList(
-                "$expand=to_PurchaseOrderItem/to_ScheduleLine/to_SubcontractingComponent");
-        allPONumbers.forEach(node -> {
-            String replicate_po_url = String.format(
-                    "https://my200132.s4hana.sapcloud.cn/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrderItem(PurchaseOrder='%s',PurchaseOrderItem='%s')/to_PurchaseOrder",
-                    node.get("PurchaseOrder").asText(),
-                    node.get("PurchaseOrderItem").asText());
-            JsonNode subcontractPO = executeRequest(
-                    HttpMethod.GET,
-                    replicate_po_url,
-                    "Basic U1VCUE9fNDc4MjU6JmhTa0Bbdm82LWsyU0R2Vm5ZW2RaLTVmVldNKXJ4UyhkXGtrRkt0Uw==",
-                    queryParams2,
-                    "",
-                    "",
-                    "");
-            String requestBody = generateBody(subcontractPO);
-            if (requestBody != null) {
-                // JsonNode replicatedPO = executeRequest(
-                // HttpMethod.POST,
-                // "https://my200132.s4hana.sapcloud.cn/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrder",
-                // "Basic
-                // U1VCUE9fNDc4MjU6JmhTa0Bbdm82LWsyU0R2Vm5ZW2RaLTVmVldNKXJ4UyhkXGtrRkt0Uw==",
-                // Collections.emptyList(),
-                // this.csrfToken,
-                // requestBody,
-                // this.cookies);
-            }
-        });
+        // 2. Create filter to get unreplicated PO Number
+        // StringBuilder filterCondition = new StringBuilder("PurchaseOrderItemCategory
+        // eq '3'");
+        // if (mappedPONumbers.size() > 0) {
+        // filterCondition.append(" and not (");
+        // boolean first = true;
+        // for (JsonNode node : mappedPONumbers) {
+        // String po = node.get(POMapping.ORIGINAL_PO).asText();
+        // String item = node.get(POMapping.ORIGINAL_PO_ITEM).asText();
+        // if (!first) {
+        // filterCondition.append(" or ");
+        // }
+        // filterCondition.append("PurchaseOrder eq '").append(po).append("'")
+        // .append(" and PurchaseOrderItem eq '").append(item).append("'");
+        // first = false;
+        // }
+        // filterCondition.append(")");
+        // }
+
+        // // 3. Get all unreplicated PO number
+        // List<String> queryParams1 = Arrays.asList(
+        // "$filter=" + filterCondition.toString(),
+        // "$select=PurchaseOrder,PurchaseOrderItem");
+        // JsonNode allPONumbers = executeRequest(
+        // HttpMethod.GET,
+        // "https://my200132.s4hana.sapcloud.cn/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrderItem",
+        // "Basic
+        // U1VCUE9fNDc4MjU6JmhTa0Bbdm82LWsyU0R2Vm5ZW2RaLTVmVldNKXJ4UyhkXGtrRkt0Uw==",
+        // queryParams1,
+        // "",
+        // "",
+        // "");
+
+        // // 4. Replicate the PO
+        // List<String> queryParams2 = Arrays.asList(
+        // "$expand=to_PurchaseOrderItem/to_ScheduleLine/to_SubcontractingComponent");
+        // allPONumbers.forEach(node -> {
+        // String replicate_po_url = String.format(
+        // "https://my200132.s4hana.sapcloud.cn/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrderItem(PurchaseOrder='%s',PurchaseOrderItem='%s')/to_PurchaseOrder",
+        // node.get("PurchaseOrder").asText(),
+        // node.get("PurchaseOrderItem").asText());
+        // JsonNode subcontractPO = executeRequest(
+        // HttpMethod.GET,
+        // replicate_po_url,
+        // "Basic
+        // U1VCUE9fNDc4MjU6JmhTa0Bbdm82LWsyU0R2Vm5ZW2RaLTVmVldNKXJ4UyhkXGtrRkt0Uw==",
+        // queryParams2,
+        // "",
+        // "",
+        // "");
+        // String requestBody = generateBody(subcontractPO);
+        // if (requestBody != null) {
+        // // JsonNode replicatedPO = executeRequest(
+        // // HttpMethod.POST,
+        // //
+        // "https://my200132.s4hana.sapcloud.cn/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrder",
+        // // "Basic
+        // // U1VCUE9fNDc4MjU6JmhTa0Bbdm82LWsyU0R2Vm5ZW2RaLTVmVldNKXJ4UyhkXGtrRkt0Uw==",
+        // // Collections.emptyList(),
+        // // this.csrfToken,
+        // // requestBody,
+        // // this.cookies);
+        // }
+        // });
         return null;
     }
 
     private JsonNode executeRequest(HttpMethod method, String baseUrl, String authorization, List<String> parameters,
             String CSRFToken, String requestBody,
             String cookieHeader) {
-        // Build API Url
+
         String queryParams = String.join("&", parameters);
         String apiUrl = baseUrl + "?" + queryParams;
 
-        // Build API Header with UTF-8
         HttpHeaders headers = new HttpHeaders();
         headers.set("DataServiceVersion", "2.0");
         headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));

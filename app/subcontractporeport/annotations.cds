@@ -36,12 +36,7 @@ annotate service.POMapping with @(
         {
             $Type: 'UI.DataField',
             Value: supplier,
-        },
-        {
-            $Type : 'UI.DataFieldForAction',
-            Action: 'MainService.startReplicatingPO',
-            Label : '{i18n>ReplicatePo}',
-        },
+        }
     ],
 );
 
