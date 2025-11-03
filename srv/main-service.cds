@@ -8,9 +8,8 @@ service MainService {
     entity ClearingLog      as projection on btpjapanprojectdemo.ClearingLog;
     entity SupplierInvoice as projection on btpjapanprojectdemo.SupplierInvoice
     actions {
-        action ShowPreviousMonth() returns SupplierInvoice;
-        action ShowCurrentMonth() returns SupplierInvoice;
+        action showPreviousMonth() returns SupplierInvoice;
+        action showCurrentMonth() returns SupplierInvoice;
+        action replicateInvoices();
     };
-    
-    action ReplicateInvoices();
 }
