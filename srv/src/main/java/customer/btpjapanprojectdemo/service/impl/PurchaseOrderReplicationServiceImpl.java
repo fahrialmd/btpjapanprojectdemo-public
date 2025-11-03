@@ -22,10 +22,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import cds.gen.mainservice.POMapping;
 import cds.gen.mainservice.StartReplicatingPOContext;
 import customer.btpjapanprojectdemo.exception.BusinessException;
-import customer.btpjapanprojectdemo.service.POMappingService;
+import customer.btpjapanprojectdemo.service.PurchaseOrderReplicationService;
 
 @Service
-public class POMappingServiceImpl implements POMappingService {
+public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplicationService {
 
     private final RestTemplate restTemplate;
     private final GenericCqnService genericCqnService;
@@ -34,7 +34,8 @@ public class POMappingServiceImpl implements POMappingService {
     private String cookies = null;
     private final SAPCloudODataClient sapCloudODataClient;
 
-    public POMappingServiceImpl(GenericCqnService genericCqnService, SAPCloudODataClient sapCloudODataClient) {
+    public PurchaseOrderReplicationServiceImpl(GenericCqnService genericCqnService,
+            SAPCloudODataClient sapCloudODataClient) {
         this.restTemplate = new RestTemplate();
         this.restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
         this.genericCqnService = genericCqnService;

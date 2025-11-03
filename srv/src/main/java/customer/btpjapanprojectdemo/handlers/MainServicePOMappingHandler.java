@@ -9,21 +9,21 @@ import com.sap.cds.services.handler.annotations.ServiceName;
 import cds.gen.mainservice.MainService_;
 import cds.gen.mainservice.POMapping;
 import cds.gen.mainservice.StartReplicatingPOContext;
-import customer.btpjapanprojectdemo.service.POMappingService;
+import customer.btpjapanprojectdemo.service.PurchaseOrderReplicationService;
 
 @Component
 @ServiceName(MainService_.CDS_NAME)
 public class MainServicePOMappingHandler implements EventHandler {
 
-    private final POMappingService poMappingService;
+    private final PurchaseOrderReplicationService PurchaseOrderReplicationService;
 
-    public MainServicePOMappingHandler(POMappingService poMappingService) {
-        this.poMappingService = poMappingService;
+    public MainServicePOMappingHandler(PurchaseOrderReplicationService PurchaseOrderReplicationService) {
+        this.PurchaseOrderReplicationService = PurchaseOrderReplicationService;
     }
 
     @On(event = StartReplicatingPOContext.CDS_NAME)
     public void onStartReplicatingPO(StartReplicatingPOContext context) {
-        POMapping result = poMappingService.startReplicatingPO(context);
+        POMapping result = PurchaseOrderReplicationService.startReplicatingPO(context);
         context.getMessages().success("PO Replicated");
         context.setCompleted();
         // context.setResult(result);
