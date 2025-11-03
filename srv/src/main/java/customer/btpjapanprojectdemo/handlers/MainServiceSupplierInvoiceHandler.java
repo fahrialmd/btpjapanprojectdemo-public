@@ -31,6 +31,7 @@ import cds.gen.mainservice.MainService_;
 import cds.gen.mainservice.SupplierInvoice;
 import cds.gen.mainservice.SupplierInvoiceReplicateInvoicesContext;
 import cds.gen.mainservice.SupplierInvoice_;
+import customer.btpjapanprojectdemo.model.InvoiceGetResponseDTO;
 
 @Component
 @ServiceName(MainService_.CDS_NAME)
@@ -45,6 +46,7 @@ public class MainServiceSupplierInvoiceHandler implements EventHandler {
     // Variable for POST API
     private String csrfToken;
     private List<String> cookieList;
+    private List<InvoiceGetResponseDTO> getResponseList;
 
     private final RestTemplate restTemplate;
 
@@ -78,10 +80,11 @@ public class MainServiceSupplierInvoiceHandler implements EventHandler {
                     String.class);
 
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                // System.out.println("INVOICE_READ" + responseEntity.getBody());
+                // Save header for CSRF Token
                 csrfToken = responseEntity.getHeaders().get("x-csrf-token").get(0);
                 cookieList = responseEntity.getHeaders().get("set-cookie");
 
+                // Parse response body
                 String response = responseEntity.getBody();
 
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -90,23 +93,28 @@ public class MainServiceSupplierInvoiceHandler implements EventHandler {
                 JsonNode dataNode = rootNode.get("d");
 
                 JsonNode resultNode = dataNode.get("results");
-                resultNode.forEach( invoice -> {
+                resultNode.forEach( invoiceJson -> {
+
+                    // mapped response to Invoice Get Response DTO Class
+                    InvoiceGetResponseDTO invoiceObject = objectMapper.convertValue(invoiceJson, InvoiceGetResponseDTO.class);
+
+                    // Fill SupplierInvoice for Fiori Frontend
                     SupplierInvoice supplierInvoice = SupplierInvoice.create();
 
-                    supplierInvoice.setInvoiceNo(invoice.get("SupplierInvoice").asText());
-                    supplierInvoice.setFiscalYear(invoice.get("FiscalYear").asText());
-                    supplierInvoice.setInvoicingParty(invoice.get("InvoicingParty").asText());
-                    supplierInvoice.setCompanyCode(invoice.get("CompanyCode").asText());
+                    supplierInvoice.setInvoiceNo(invoiceObject.getSupplierInvoice());
+                    supplierInvoice.setFiscalYear(invoiceObject.getFiscalYear());
+                    supplierInvoice.setInvoicingParty(invoiceObject.getInvoicingParty());
+                    supplierInvoice.setCompanyCode(invoiceObject.getCompanyCode());
 
-                    BigDecimal grossInvoice = new BigDecimal(invoice.get("InvoiceGrossAmount").asText());
+                    BigDecimal grossInvoice = new BigDecimal(invoiceObject.getInvoiceGrossAmount());
                     supplierInvoice.setGrossInvoice(grossInvoice);
 
-                    supplierInvoice.setDocumentCurrencyCode(invoice.get("DocumentCurrency").asText());
-                    supplierInvoice.setReference(invoice.get("SupplierInvoiceIDByInvcgParty").asText());
+                    supplierInvoice.setDocumentCurrencyCode(invoiceObject.getDocumentCurrency());
+                    supplierInvoice.setReference(invoiceObject.getSupplierInvoiceIDByInvcgParty());
 
                     
-                    supplierInvoice.setPostingDate(convertJsonToDate(invoice, "PostingDate"));
-                    supplierInvoice.setInvoiceDate(convertJsonToDate(invoice, "DocumentDate"));
+                    supplierInvoice.setPostingDate(convertJsonToDate(invoiceObject.getPostingDate()));
+                    supplierInvoice.setInvoiceDate(convertJsonToDate(invoiceObject.getDocumentDate()));
 
                     supplierInvoices.add(supplierInvoice);
                 });
@@ -124,9 +132,8 @@ public class MainServiceSupplierInvoiceHandler implements EventHandler {
         context.setResult(resultBuilder.result());
     }
 
-    private LocalDate convertJsonToDate(JsonNode json, String Fieldname) {
-        String dateBody = json.get(Fieldname).asText();
-        String dateEpoch = dateBody.replaceAll("[^0-9]", "");
+    private LocalDate convertJsonToDate(String jsonEpochDate) {
+        String dateEpoch = jsonEpochDate.replaceAll("[^0-9]", "");
         Instant dateinstant = Instant.ofEpochMilli(Long.valueOf(dateEpoch));
         LocalDate date = dateinstant.atZone(ZoneId.systemDefault()).toLocalDate();
         return date;
