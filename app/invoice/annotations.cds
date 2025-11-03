@@ -28,10 +28,6 @@ annotate service.SupplierInvoice with @(
         },
         {
             $Type : 'UI.DataField',
-            Value : document_currency_code,
-        },
-        {
-            $Type : 'UI.DataField',
             Value : posting_date,
             Label : 'posting_date',
         },

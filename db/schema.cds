@@ -52,7 +52,7 @@ entity SupplierInvoice {
     key fiscal_year : String(4);
     invoicing_party : String(8);
     company_code : String(4);
-    @Measures.ISOCurrency : currency_code
+    @Measures.ISOCurrency : document_currency_code
     gross_invoice : Decimal(13,2);
     @Semantics.currencyCode
     document_currency : Currency;
