@@ -55,9 +55,9 @@ public class SAPCloudODataClient {
     private final ObjectMapper objectMapper;
 
     public SAPCloudODataClient() {
-        this.restTemplate = new RestTemplate();
-        this.restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-        this.objectMapper = new ObjectMapper();
+        restTemplate = new RestTemplate();
+        restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+        objectMapper = new ObjectMapper();
     }
 
     /**
@@ -200,20 +200,20 @@ public class SAPCloudODataClient {
 
     private String getCsrfToken(SAPCommUser user) {
         return switch (user) {
-            case SAPCommUser.PURCHASE_ORDER -> this.purchaseOrderCsrfToken;
-            case SAPCommUser.GOODS_MOVEMENT -> this.goodsMovementCsrfToken;
-            case SAPCommUser.INVOICE_REGISTRATION -> this.invoiceRegistrationCsrfToken;
-            case SAPCommUser.ACCOUNTING_CLEARING -> this.accountingClearingCsrfToken;
+            case SAPCommUser.PURCHASE_ORDER -> purchaseOrderCsrfToken;
+            case SAPCommUser.GOODS_MOVEMENT -> goodsMovementCsrfToken;
+            case SAPCommUser.INVOICE_REGISTRATION -> invoiceRegistrationCsrfToken;
+            case SAPCommUser.ACCOUNTING_CLEARING -> accountingClearingCsrfToken;
             default -> null;
         };
     }
 
     private void setCsrfToken(SAPCommUser user, String token) {
         switch (user) {
-            case SAPCommUser.PURCHASE_ORDER -> this.purchaseOrderCsrfToken = token;
-            case SAPCommUser.GOODS_MOVEMENT -> this.goodsMovementCsrfToken = token;
-            case SAPCommUser.INVOICE_REGISTRATION -> this.invoiceRegistrationCsrfToken = token;
-            case SAPCommUser.ACCOUNTING_CLEARING -> this.accountingClearingCsrfToken = token;
+            case SAPCommUser.PURCHASE_ORDER -> purchaseOrderCsrfToken = token;
+            case SAPCommUser.GOODS_MOVEMENT -> goodsMovementCsrfToken = token;
+            case SAPCommUser.INVOICE_REGISTRATION -> invoiceRegistrationCsrfToken = token;
+            case SAPCommUser.ACCOUNTING_CLEARING -> accountingClearingCsrfToken = token;
             default -> {
             }
         }
@@ -221,20 +221,20 @@ public class SAPCloudODataClient {
 
     private String getCookies(SAPCommUser user) {
         return switch (user) {
-            case SAPCommUser.PURCHASE_ORDER -> this.purchaseOrderCookies;
-            case SAPCommUser.GOODS_MOVEMENT -> this.goodsMovementCookies;
-            case SAPCommUser.INVOICE_REGISTRATION -> this.invoiceRegistrationCookies;
-            case SAPCommUser.ACCOUNTING_CLEARING -> this.accountingClearingCookies;
+            case SAPCommUser.PURCHASE_ORDER -> purchaseOrderCookies;
+            case SAPCommUser.GOODS_MOVEMENT -> goodsMovementCookies;
+            case SAPCommUser.INVOICE_REGISTRATION -> invoiceRegistrationCookies;
+            case SAPCommUser.ACCOUNTING_CLEARING -> accountingClearingCookies;
             default -> null;
         };
     }
 
     private void setCookies(SAPCommUser user, String cookies) {
         switch (user) {
-            case SAPCommUser.PURCHASE_ORDER -> this.purchaseOrderCookies = cookies;
-            case SAPCommUser.GOODS_MOVEMENT -> this.goodsMovementCookies = cookies;
-            case SAPCommUser.INVOICE_REGISTRATION -> this.invoiceRegistrationCookies = cookies;
-            case SAPCommUser.ACCOUNTING_CLEARING -> this.accountingClearingCookies = cookies;
+            case SAPCommUser.PURCHASE_ORDER -> purchaseOrderCookies = cookies;
+            case SAPCommUser.GOODS_MOVEMENT -> goodsMovementCookies = cookies;
+            case SAPCommUser.INVOICE_REGISTRATION -> invoiceRegistrationCookies = cookies;
+            case SAPCommUser.ACCOUNTING_CLEARING -> accountingClearingCookies = cookies;
             default -> {
             }
         }
