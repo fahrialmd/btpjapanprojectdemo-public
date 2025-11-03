@@ -1,23 +1,20 @@
 package customer.btpjapanprojectdemo.service.impl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sap.cds.Result;
 import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnSelect;
 
 import cds.gen.mainservice.MainService;
 import cds.gen.mainservice.POMapping;
 import cds.gen.mainservice.POMapping_;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Service
 public class GenericCqnService {
@@ -52,6 +49,17 @@ public class GenericCqnService {
         });
 
         return results;
+    }
+
+    // Insert single POMapping
+    public Result insertPoMapping(POMapping data) {
+        return entityService.insert(
+                mainService,
+                null,
+                POMapping_.class,
+                data,
+                true // isActiveEntity = true (not a draft)
+        );
     }
 
 }
