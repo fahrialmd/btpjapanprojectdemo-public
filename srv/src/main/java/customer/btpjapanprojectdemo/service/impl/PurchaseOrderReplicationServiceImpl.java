@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import cds.gen.mainservice.POMapping;
 import cds.gen.mainservice.StartReplicatingPOContext;
+import customer.btpjapanprojectdemo.exception.BusinessException;
 import customer.btpjapanprojectdemo.model.PurchaseOrderDTO;
 import customer.btpjapanprojectdemo.model.PurchaseOrderItemDTO;
 import customer.btpjapanprojectdemo.service.PurchaseOrderReplicationService;
@@ -55,18 +56,26 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                 JsonNode mappedPoNumbers = genericCqnService.getPOHeaderItemOriginalIds();
 
                 // 2. Get unmapped PO numbers from SAP
-                StringBuilder mappedPoNumbersFilter = new StringBuilder();
+                String completeFilter;
 
-                mappedPoNumbers.forEach(node -> {
-                        String mappedPoNumbersFilterTemp = String.format(
-                                        "PurchaseOrder eq '%s' and PurchaseOrderItem eq '%s'",
-                                        node.get(POMapping.ORIGINAL_PO).asText(),
-                                        node.get(POMapping.ORIGINAL_PO_ITEM).asText());
-                        mappedPoNumbersFilter.append(mappedPoNumbersFilterTemp);
-                });
+                if (mappedPoNumbers.size() == 0) {
+                        completeFilter = "PurchaseOrderItemCategory eq '3'";
+                } else {
+                        List<String> mappedPoFilters = new ArrayList<>();
 
-                String completeFilter = String.format("PurchaseOrderItemCategory eq '3' and not (%s)",
-                                mappedPoNumbersFilter.toString());
+                        mappedPoNumbers.forEach(node -> {
+                                String filter = String.format(
+                                                "(PurchaseOrder eq '%s' and PurchaseOrderItem eq '%s')",
+                                                node.get(POMapping.ORIGINAL_PO).asText(),
+                                                node.get(POMapping.ORIGINAL_PO_ITEM).asText());
+                                mappedPoFilters.add(filter);
+                        });
+
+                        String mappedPoConditions = String.join(" or ", mappedPoFilters);
+                        completeFilter = String.format(
+                                        "PurchaseOrderItemCategory eq '3' and not (%s)",
+                                        mappedPoConditions);
+                }
 
                 String allPoNumbersUrl = UriComponentsBuilder.newInstance()
                                 .scheme("https")
@@ -207,7 +216,8 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                 String supplier = originalPO.getSupplier();
 
                                 // Step 2: Clean the DTO for POST
-                                PurchaseOrderDTO cleanedPO = PurchaseOrderPostPrepare.cleanForPost(originalPO);
+                                PurchaseOrderDTO cleanedPO = PurchaseOrderPostPrepare
+                                                .preparePurchaseOrderBody(originalPO);
 
                                 // Step 3: Convert DTO to JSON string
                                 String postPayload = objectMapper.writeValueAsString(cleanedPO);
@@ -257,7 +267,7 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
 
                         } catch (Exception e) {
                                 System.err.println("Error replicating PO: " + e.getMessage());
-                                throw new RuntimeException("Failed to replicate PO", e);
+                                throw new BusinessException("Failed to replicate PO " + e);
                         }
                 });
 
@@ -267,197 +277,5 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                 });
 
                 return poMappingList.isEmpty() ? null : poMappingList.get(0);
-
-                // // 4. Clean PO Body
-                // ArrayNode postPoBodyResultsCleaned = cleanPurchaseOrderBody(poBodyResults);
-
-                // // 5. Replicate PO
-                // List<POMapping> poMappingList = new ArrayList<>();
-                // postPoBodyResultsCleaned.forEach(nodeReplicatePO -> {
-                // String poMappingOriginalPo = nodeReplicatePO.path("PurchaseOrder").asText();
-                // String poMappingCompanyCode = nodeReplicatePO.path("CompanyCode").asText();
-                // String poMappingSupplier = nodeReplicatePO.path("Supplier").asText();
-
-                // // Remove the PO number before posting
-                // ObjectNode replicatePoObjNode = (ObjectNode) nodeReplicatePO;
-                // replicatePoObjNode.remove("PurchaseOrder");
-
-                // String poReplicateUrl = UriComponentsBuilder.newInstance()
-                // .scheme("https")
-                // .host("my200132.s4hana.sapcloud.cn")
-                // .path("/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrder")
-                // .build()
-                // .toUriString();
-
-                // String test = new String();
-
-                // try {
-                // test = objectMapper.writeValueAsString(replicatePoObjNode);
-                // } catch (JsonProcessingException e) {
-                // // TODO Auto-generated catch block
-                // e.printStackTrace();
-                // }
-
-                // JsonNode poReplicate = sapCloudODataClient.executeRequest(
-                // HttpMethod.POST,
-                // poReplicateUrl,
-                // test,
-                // SAPCloudODataClient.SAPCommUser.PURCHASE_ORDER);
-
-                // // Loop through original items and map to replica items
-                // JsonNode originalItems = nodeReplicatePO.path("to_PurchaseOrderItem");
-                // JsonNode replicaItems =
-                // poReplicate.path("to_PurchaseOrderItem").path("results");
-
-                // // Assuming items are in same order
-                // for (int i = 0; i < originalItems.size(); i++) {
-                // JsonNode originalItem = originalItems.get(i);
-                // JsonNode replicaItem = replicaItems.get(i);
-
-                // POMapping mapping = POMapping.create();
-                // mapping.setOriginalPo(poMappingOriginalPo);
-                // mapping.setOriginalPoItem(originalItem.path("PurchaseOrderItem").asText());
-                // mapping.setReplicaPo(poReplicate.path("PurchaseOrder").asText());
-                // mapping.setReplicaPoItem(replicaItem.path("PurchaseOrderItem").asText());
-                // mapping.setCompanyCode(poMappingCompanyCode);
-                // mapping.setSupplier(poMappingSupplier);
-                // poMappingList.add(mapping);
-                // }
-                // });
-
-                // // Insert PO Mapping
-                // poMappingList.forEach(poMapping -> {
-                // genericCqnService.insertPoMapping(poMapping);
-                // });
-
-                // PrintStream o;
-                // try {
-                // o = new PrintStream(new File("test.txt"));
-                // PrintStream console = System.out;
-                // System.setOut(o);
-                // } catch (FileNotFoundException e) {
-                // // TODO Auto-generated catch block
-                // e.printStackTrace();
-                // }
-
-                // try {
-                // String prettyJson = objectMapper.writerWithDefaultPrettyPrinter()
-                // .writeValueAsString(postPoBodyResultsCleaned);
-                // System.out.println(prettyJson);
-                // } catch (JsonProcessingException e) {
-                // // TODO Auto-generated catch block
-                // e.printStackTrace();
-                // }
-
-                // return null;
-        }
-
-        // private JsonNode executeRequest(HttpMethod method, String baseUrl, String
-        // authorization, List<String> parameters,
-        // String CSRFToken, String requestBody,
-        // String cookieHeader) {
-
-        // String queryParams = String.join("&", parameters);
-        // String apiUrl = baseUrl + "?" + queryParams;
-
-        // HttpHeaders headers = new HttpHeaders();
-        // headers.set("DataServiceVersion", "2.0");
-        // headers.setContentType(new MediaType("application", "json",
-        // StandardCharsets.UTF_8));
-        // headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        // headers.setAcceptCharset(Collections.singletonList(StandardCharsets.UTF_8));
-        // headers.set("Authorization", authorization);
-        // headers.set("x-csrf-token", (CSRFToken == null || CSRFToken.isEmpty()) ?
-        // "fetch" : CSRFToken);
-        // if (cookieHeader != null && !cookieHeader.isEmpty()) {
-        // headers.set("Cookie", cookieHeader);
-        // }
-
-        // HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
-
-        // // Execute API
-        // try {
-        // ResponseEntity<String> response = restTemplate.exchange(
-        // apiUrl,
-        // method,
-        // requestEntity,
-        // String.class);
-
-        // if (response.getStatusCode().is2xxSuccessful()) {
-        // JsonNode responseJsonNode = objectMapper.readTree(response.getBody());
-        // JsonNode d = responseJsonNode.get("d");
-        // this.csrfToken = response.getHeaders().getFirst("x-csrf-token");
-        // List<String> cookieList = response.getHeaders().get("Set-Cookie");
-        // if (cookieList != null) {
-        // List<String> pairs = new java.util.ArrayList<>();
-        // for (String line : cookieList) {
-        // String first = line.split(";", 2)[0];
-        // if (first.contains("="))
-        // pairs.add(first.trim());
-        // }
-        // this.cookies = String.join("; ", pairs);
-        // }
-
-        // // Check if it's a collection or single entity
-        // if (d.has("results")) {
-        // return d.get("results");
-        // } else {
-        // return d;
-        // }
-        // } else {
-        // throw new BusinessException("API call failed with status: " +
-        // response.getStatusCode());
-        // }
-        // } catch (Exception e) {
-        // System.out.println("Error: " + e.toString());
-        // throw new BusinessException("Failed to get subcontract PO items", e);
-        // }
-        // }
-
-        // private String generateBody(JsonNode rawBody) {
-        // JsonNode cleanedBody = cleanODataResponse(rawBody);
-        // try {
-        // // Use the UTF-8 configured objectMapper
-        // return objectMapper.writerWithDefaultPrettyPrinter()
-        // .writeValueAsString(cleanedBody);
-        // } catch (JsonProcessingException e) {
-        // throw new BusinessException("Failed to generate request body", e);
-        // }
-        // }
-
-        private ArrayNode cleanPurchaseOrderBody(ArrayNode nodeBody) {
-                List<String> fieldsToRemove = Arrays.asList(
-                                "CreationDate", "CreatedByUser", "LastChangeDateTime",
-                                "PurchasingDocument", "PurchasingDocumentItem", "PurchasingProcessingStatus",
-                                "PurchasingCompletenessStatus", "PurchasingDocumentOrigin",
-                                "PurchasingDocumentDeletionCode", "IsCompletelyDelivered",
-                                "IsFinallyInvoiced", "__metadata", "__deferred", "__next", "__count",
-                                "to_PurchaseOrderNote", "to_AccountAssignment", "to_PurchaseOrderItemNote",
-                                "to_PurchaseOrderPricingElement", "to_PurchaseOrder");
-
-                cleanJsonNode(nodeBody, fieldsToRemove);
-                return nodeBody;
-        }
-
-        private void cleanJsonNode(JsonNode node, List<String> fieldsToRemove) {
-                if (node.isObject()) {
-                        ObjectNode objectNode = (ObjectNode) node;
-
-                        // First, remove unwanted fields at this level
-                        fieldsToRemove.forEach(objectNode::remove);
-
-                        // Then, recursively process ALL remaining fields
-                        objectNode.fields().forEachRemaining(entry -> {
-                                cleanJsonNode(entry.getValue(), fieldsToRemove);
-                        });
-
-                } else if (node.isArray()) {
-                        ArrayNode arrayNode = (ArrayNode) node;
-
-                        // Recursively clean each item in the array
-                        arrayNode.forEach(element -> {
-                                cleanJsonNode(element, fieldsToRemove);
-                        });
-                }
         }
 }

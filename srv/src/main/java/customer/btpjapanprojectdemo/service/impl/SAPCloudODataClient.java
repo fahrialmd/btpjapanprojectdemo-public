@@ -20,10 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import customer.btpjapanprojectdemo.exception.BusinessException;
 
-/**
- * Client for SAP S/4HANA Cloud OData API interactions.
- * Handles CSRF token management and session cookies automatically.
- */
 @Service
 public class SAPCloudODataClient {
 
