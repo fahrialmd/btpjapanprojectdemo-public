@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -22,7 +23,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import cds.gen.mainservice.POMapping;
 import cds.gen.mainservice.StartReplicatingPOContext;
+import customer.btpjapanprojectdemo.model.PurchaseOrderDTO;
+import customer.btpjapanprojectdemo.model.PurchaseOrderItemDTO;
 import customer.btpjapanprojectdemo.service.PurchaseOrderReplicationService;
+import customer.btpjapanprojectdemo.util.PurchaseOrderPostPrepare;
 
 @Service
 public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplicationService {
@@ -69,7 +73,8 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                 .host("my200132.s4hana.sapcloud.cn")
                                 .path("/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrderItem")
                                 .queryParam("$select", "PurchaseOrder,PurchaseOrderItem")
-                                .queryParam("$filter", "PurchaseOrder eq '4500000022'")
+                                .queryParam("$filter", completeFilter)
+                                .queryParam("$top", "1")
                                 .build()
                                 .toUriString();
 
@@ -107,8 +112,9 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                 ArrayNode poBodyResults = objectMapper.createArrayNode();
                 allPoNumbersResult.forEach(node -> {
                         boolean isSingleItem = node.path("PurchaseOrderItem").size() == 1;
-
+                        // Check if the PO has only one123 item
                         if (isSingleItem) {
+                                // Header and item in single request
                                 String poBodySingleUrlTemp = String.format(
                                                 "/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrderItem(PurchaseOrder='%s',PurchaseOrderItem='%s')/to_PurchaseOrder",
                                                 node.path("PurchaseOrder").asText(),
@@ -119,7 +125,7 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                                 .host("my200132.s4hana.sapcloud.cn")
                                                 .path(poBodySingleUrlTemp)
                                                 .queryParam("$expand",
-                                                                "to_PurchaseOrderItem/to_ScheduleLine/to_SubcontractingComponent")
+                                                                "to_PurchaseOrderNote,to_PurchaseOrderItem/to_ScheduleLine/to_SubcontractingComponent,to_PurchaseOrderItem/to_AccountAssignment,to_PurchaseOrderItem/to_PurchaseOrderItemNote")
                                                 .build()
                                                 .toUriString();
 
@@ -141,6 +147,8 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                                 .scheme("https")
                                                 .host("my200132.s4hana.sapcloud.cn")
                                                 .path(poBodyMultiHeaderUrlTemp)
+                                                .queryParam("$expand",
+                                                                "to_PurchaseOrderNote")
                                                 .build()
                                                 .toUriString();
 
@@ -164,7 +172,8 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                                 .host("my200132.s4hana.sapcloud.cn")
                                                 .path("/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrderItem")
                                                 .queryParam("$filter", poBodyMultiItemFilter)
-                                                .queryParam("$expand", "to_ScheduleLine/to_SubcontractingComponent")
+                                                .queryParam("$expand",
+                                                                "to_ScheduleLine/to_SubcontractingComponent,to_AccountAssignment,to_PurchaseOrderItemNote")
                                                 .build()
                                                 .toUriString();
 
@@ -179,61 +188,147 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                 poBodyMultiCombined.replace("to_PurchaseOrderItem", poBodyMultiItem);
 
                                 poBodyResults.add(poBodyMultiCombined);
-
                         }
                 });
 
-                // 4. Clean PO Body
-                ArrayNode postPoBodyResultsCleaned = cleanPurchaseOrderBody(poBodyResults);
-
-                // 5. Replicate PO
+                // 5. Convert JsonNode to DTO, Clean, and POST
                 List<POMapping> poMappingList = new ArrayList<>();
-                postPoBodyResultsCleaned.forEach(nodeReplicatePO -> {
-                        String poMappingOriginalPo = nodeReplicatePO.path("PurchaseOrder").asText();
-                        String poMappingCompanyCode = nodeReplicatePO.path("CompanyCode").asText();
-                        String poMappingSupplier = nodeReplicatePO.path("Supplier").asText();
 
-                        // Remove the PO number before posting
-                        ObjectNode replicatePoObjNode = (ObjectNode) nodeReplicatePO;
-                        replicatePoObjNode.remove("PurchaseOrder");
+                poBodyResults.forEach(poJsonNode -> {
+                        try {
+                                // Step 1: Convert JsonNode to DTO
+                                PurchaseOrderDTO originalPO = objectMapper.treeToValue(
+                                                poJsonNode,
+                                                PurchaseOrderDTO.class);
 
-                        String poReplicateUrl = UriComponentsBuilder.newInstance()
-                                        .scheme("https")
-                                        .host("my200132.s4hana.sapcloud.cn")
-                                        .path("/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrder('4500000022')?$expand=to_PurchaseOrderItem")
-                                        .build()
-                                        .toUriString();
+                                // Store original info for mapping
+                                String originalPoNumber = originalPO.getPurchaseOrder();
+                                String companyCode = originalPO.getCompanyCode();
+                                String supplier = originalPO.getSupplier();
 
-                        JsonNode poReplicate = sapCloudODataClient.executeRequest(
-                                        HttpMethod.GET,
-                                        poReplicateUrl,
-                                        replicatePoObjNode.asText(),
-                                        SAPCloudODataClient.SAPCommUser.PURCHASE_ORDER);
+                                // Step 2: Clean the DTO for POST
+                                PurchaseOrderDTO cleanedPO = PurchaseOrderPostPrepare.cleanForPost(originalPO);
 
-                        // Loop through original items and map to replica items
-                        JsonNode originalItems = nodeReplicatePO.path("to_PurchaseOrderItem");
-                        JsonNode replicaItems = poReplicate.path("to_PurchaseOrderItem").path("results");
+                                // Step 3: Convert DTO to JSON string
+                                String postPayload = objectMapper.writeValueAsString(cleanedPO);
 
-                        // Assuming items are in same order
-                        for (int i = 0; i < originalItems.size(); i++) {
-                                JsonNode originalItem = originalItems.get(i);
-                                JsonNode replicaItem = replicaItems.get(i);
+                                // Debug: Print the payload (optional)
+                                System.out.println("=== POST PAYLOAD ===");
+                                System.out.println(objectMapper.writerWithDefaultPrettyPrinter()
+                                                .writeValueAsString(cleanedPO));
 
-                                POMapping mapping = POMapping.create();
-                                mapping.setOriginalPo(poMappingOriginalPo);
-                                mapping.setOriginalPoItem(originalItem.path("PurchaseOrderItem").asText());
-                                mapping.setReplicaPo(poReplicate.path("PurchaseOrder").asText());
-                                mapping.setReplicaPoItem(replicaItem.path("PurchaseOrderItem").asText());
-                                mapping.setCompanyCode(poMappingCompanyCode);
-                                mapping.setSupplier(poMappingSupplier);
-                                poMappingList.add(mapping);
+                                // Step 4: POST to create replica PO
+                                String poReplicateUrl = UriComponentsBuilder.newInstance()
+                                                .scheme("https")
+                                                .host("my200132.s4hana.sapcloud.cn")
+                                                .path("/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrder")
+                                                .build()
+                                                .toUriString();
+
+                                JsonNode poReplicateResponse = sapCloudODataClient.executeRequest(
+                                                HttpMethod.POST,
+                                                poReplicateUrl,
+                                                postPayload,
+                                                SAPCloudODataClient.SAPCommUser.PURCHASE_ORDER);
+
+                                // Step 5: Parse response and create mappings
+                                PurchaseOrderDTO replicatedPO = objectMapper.treeToValue(
+                                                poReplicateResponse,
+                                                PurchaseOrderDTO.class);
+
+                                String replicaPoNumber = replicatedPO.getPurchaseOrder();
+
+                                // Map original items to replica items
+                                List<PurchaseOrderItemDTO> originalItems = originalPO.getToPurchaseOrderItem()
+                                                .getResults();
+                                List<PurchaseOrderItemDTO> replicaItems = replicatedPO.getToPurchaseOrderItem()
+                                                .getResults();
+
+                                for (int i = 0; i < originalItems.size(); i++) {
+                                        POMapping mapping = POMapping.create();
+                                        mapping.setOriginalPo(originalPoNumber);
+                                        mapping.setOriginalPoItem(originalItems.get(i).getPurchaseOrderItem());
+                                        mapping.setReplicaPo(replicaPoNumber);
+                                        mapping.setReplicaPoItem(replicaItems.get(i).getPurchaseOrderItem());
+                                        mapping.setCompanyCode(companyCode);
+                                        mapping.setSupplier(supplier);
+                                        poMappingList.add(mapping);
+                                }
+
+                        } catch (Exception e) {
+                                System.err.println("Error replicating PO: " + e.getMessage());
+                                throw new RuntimeException("Failed to replicate PO", e);
                         }
                 });
 
-                // Insert PO Mapping
+                // 6. Insert PO Mappings
                 poMappingList.forEach(poMapping -> {
                         genericCqnService.insertPoMapping(poMapping);
                 });
+
+                return poMappingList.isEmpty() ? null : poMappingList.get(0);
+
+                // // 4. Clean PO Body
+                // ArrayNode postPoBodyResultsCleaned = cleanPurchaseOrderBody(poBodyResults);
+
+                // // 5. Replicate PO
+                // List<POMapping> poMappingList = new ArrayList<>();
+                // postPoBodyResultsCleaned.forEach(nodeReplicatePO -> {
+                // String poMappingOriginalPo = nodeReplicatePO.path("PurchaseOrder").asText();
+                // String poMappingCompanyCode = nodeReplicatePO.path("CompanyCode").asText();
+                // String poMappingSupplier = nodeReplicatePO.path("Supplier").asText();
+
+                // // Remove the PO number before posting
+                // ObjectNode replicatePoObjNode = (ObjectNode) nodeReplicatePO;
+                // replicatePoObjNode.remove("PurchaseOrder");
+
+                // String poReplicateUrl = UriComponentsBuilder.newInstance()
+                // .scheme("https")
+                // .host("my200132.s4hana.sapcloud.cn")
+                // .path("/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrder")
+                // .build()
+                // .toUriString();
+
+                // String test = new String();
+
+                // try {
+                // test = objectMapper.writeValueAsString(replicatePoObjNode);
+                // } catch (JsonProcessingException e) {
+                // // TODO Auto-generated catch block
+                // e.printStackTrace();
+                // }
+
+                // JsonNode poReplicate = sapCloudODataClient.executeRequest(
+                // HttpMethod.POST,
+                // poReplicateUrl,
+                // test,
+                // SAPCloudODataClient.SAPCommUser.PURCHASE_ORDER);
+
+                // // Loop through original items and map to replica items
+                // JsonNode originalItems = nodeReplicatePO.path("to_PurchaseOrderItem");
+                // JsonNode replicaItems =
+                // poReplicate.path("to_PurchaseOrderItem").path("results");
+
+                // // Assuming items are in same order
+                // for (int i = 0; i < originalItems.size(); i++) {
+                // JsonNode originalItem = originalItems.get(i);
+                // JsonNode replicaItem = replicaItems.get(i);
+
+                // POMapping mapping = POMapping.create();
+                // mapping.setOriginalPo(poMappingOriginalPo);
+                // mapping.setOriginalPoItem(originalItem.path("PurchaseOrderItem").asText());
+                // mapping.setReplicaPo(poReplicate.path("PurchaseOrder").asText());
+                // mapping.setReplicaPoItem(replicaItem.path("PurchaseOrderItem").asText());
+                // mapping.setCompanyCode(poMappingCompanyCode);
+                // mapping.setSupplier(poMappingSupplier);
+                // poMappingList.add(mapping);
+                // }
+                // });
+
+                // // Insert PO Mapping
+                // poMappingList.forEach(poMapping -> {
+                // genericCqnService.insertPoMapping(poMapping);
+                // });
 
                 // PrintStream o;
                 // try {
@@ -254,7 +349,7 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                 // e.printStackTrace();
                 // }
 
-                return null;
+                // return null;
         }
 
         // private JsonNode executeRequest(HttpMethod method, String baseUrl, String

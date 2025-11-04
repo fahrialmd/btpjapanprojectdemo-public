@@ -58,8 +58,7 @@ public class GenericCqnService {
                 null,
                 POMapping_.class,
                 data,
-                true // isActiveEntity = true (not a draft)
-        );
+                true);
     }
 
 }

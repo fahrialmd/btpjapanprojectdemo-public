@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -187,15 +187,19 @@ public class PurchaseOrderDTO {
 
     @JsonProperty("PurgProdCmplncTotDngrsGoodsSts")
     private String purgProdCmplncTotDngrsGoodsSts;
-    
+
     @JsonProperty("to_PurchaseOrderItem")
     private NavigationResults<PurchaseOrderItemDTO> toPurchaseOrderItem;
 
+    @JsonProperty("to_PurchaseOrderNote")
+    private NavigationResults<PurchaseOrderNoteDTO> toPurchaseOrderNote;
+
     @Data
-    @Builder
+    @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class NavigationResults<T> {
         @JsonProperty("results")
         private List<T> results;

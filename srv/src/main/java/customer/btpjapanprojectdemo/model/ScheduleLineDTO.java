@@ -1,15 +1,26 @@
 package customer.btpjapanprojectdemo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import java.util.List;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
+@NoArgsConstructor // ← Jackson needs this for deserialization
+@AllArgsConstructor // ← Builder needs this
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ScheduleLineDTO {
+
+    @JsonProperty("PurchasingDocument")
+    private String purchasingDocument;
+
+    @JsonProperty("PurchasingDocumentItem")
+    private String purchasingDocumentItem;
 
     @JsonProperty("ScheduleLine")
     private String scheduleLine;
@@ -20,14 +31,28 @@ public class ScheduleLineDTO {
     @JsonProperty("ScheduleLineOrderQuantity")
     private String scheduleLineOrderQuantity;
 
-    @JsonProperty("to_SubcontractingComponent")
-    private SubcontractingComponentWrapper toSubcontractingComponent;
+    @JsonProperty("ScheduleLineDeliveryTime")
+    private String scheduleLineDeliveryTime;
 
-    @Data
-    @Builder
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class SubcontractingComponentWrapper {
-        @JsonProperty("results")
-        private List<SubcontractingComponentDTO> results;
-    }
+    @JsonProperty("SchedLineStscDeliveryDate")
+    private String schedLineStscDeliveryDate;
+
+    @JsonProperty("PurchaseRequisition")
+    private String purchaseRequisition;
+
+    @JsonProperty("PurchaseRequisitionItem")
+    private String purchaseRequisitionItem;
+
+    @JsonProperty("ScheduleLineCommittedQuantity")
+    private String scheduleLineCommittedQuantity;
+
+    @JsonProperty("PerformancePeriodStartDate")
+    private String performancePeriodStartDate;
+
+    @JsonProperty("PerformancePeriodEndDate")
+    private String performancePeriodEndDate;
+
+    @JsonProperty("to_SubcontractingComponent")
+    private PurchaseOrderDTO.NavigationResults<SubcontractingComponentDTO> toSubcontractingComponent;
+
 }

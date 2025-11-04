@@ -11,7 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -319,13 +319,12 @@ public class PurchaseOrderItemDTO {
     private Integer yy1Test1PDIF;
 
     @JsonProperty("to_ScheduleLine")
-    private ScheduleLineWrapper toScheduleLine;
+    private PurchaseOrderDTO.NavigationResults<ScheduleLineDTO> toScheduleLine;
 
-    @Data
-    @Builder
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class ScheduleLineWrapper {
-        @JsonProperty("results")
-        private List<ScheduleLineDTO> results;
-    }
+    @JsonProperty("to_AccountAssignment")
+    private PurchaseOrderDTO.NavigationResults<AccountAssignmentDTO> toAccountAssignment;
+
+    @JsonProperty("to_PurchaseOrderItemNote")
+    private PurchaseOrderDTO.NavigationResults<PurchaseOrderItemNoteDTO> toPurchaseOrderItemNote;
+
 }
