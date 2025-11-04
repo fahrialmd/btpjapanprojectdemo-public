@@ -43,18 +43,18 @@ annotate service.SupplierInvoice with @(
         },
         {
             $Type : 'UI.DataFieldForAction',
-            Action : 'MainService.ShowPreviousMonth',
-            Label : 'ShowPreviousMonth',
+            Action : 'MainService.replicateInvoices',
+            Label : 'replicateInvoices',
         },
         {
             $Type : 'UI.DataFieldForAction',
-            Action : 'MainService.ShowCurrentMonth',
-            Label : 'ShowCurrentMonth',
+            Action : 'MainService.showCurrentMonth',
+            Label : 'showCurrentMonth',
         },
         {
             $Type : 'UI.DataFieldForAction',
-            Action : 'MainService.EntityContainer/ReplicateInvoices',
-            Label : 'ReplicateInvoices',
+            Action : 'MainService.showPreviousMonth',
+            Label : 'showPreviousMonth',
         },
     ]
 );
