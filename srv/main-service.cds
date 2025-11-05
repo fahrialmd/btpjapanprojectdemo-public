@@ -12,4 +12,6 @@ service MainService {
         action showCurrentMonth() returns SupplierInvoice;
         action replicateInvoices();
     };
+
+    action startReplicatingPO() returns array of POMapping;
 }

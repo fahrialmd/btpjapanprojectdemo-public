@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -61,7 +64,6 @@
 			<version>1.18.42</version>
 			<scope>provided</scope>
 		</dependency>
-		
 	</dependencies>
 
 	<build>
@@ -146,7 +148,8 @@
 						<configuration>
 							<commands>
 								<command>build --for java</command>
-                                <command>deploy --to hana --dry &gt; srv/src/main/resources/schema.sql</command>
+								<command>deploy --to hana --dry &gt;
+									srv/src/main/resources/schema.sql</command>
 							</commands>
 						</configuration>
 					</execution>
@@ -158,6 +161,25 @@
 						</goals>
 						<configuration>
 							<basePackage>cds.gen</basePackage>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.basedir}/src/gen/java</source>
+							</sources>
 						</configuration>
 					</execution>
 				</executions>

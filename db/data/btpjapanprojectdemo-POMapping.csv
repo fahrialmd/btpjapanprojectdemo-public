@@ -1,2 +1,2 @@
-ID,company_code,po_number,item,createdAt,createdBy,modifiedAt,modifiedBy
-58225697-9c5f-40d0-85f9-5214e23eddcf,company_code-5822569,po_number-5822569,item-5822569,2019-02-11T17:00:00.000Z,createdBy.3gsq1@example.com,2012-07-25T17:00:00.000Z,modifiedBy.3gsq1@example.com
+ID,original_po,original_po_item,replica_po,replica_po_item,company_code,supplier,createdAt,createdBy,modifiedAt,modifiedBy
+25053423-20e0-43b0-b83f-e0e35b6886ff,o-25053423,53423,o-25053423,53423,3423,r-25053423,2003-01-10T17:00:00.000Z,createdBy.ewzcf@example.net,2007-02-16T17:00:00.000Z,modifiedBy.ewzcf@example.com
