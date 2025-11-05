@@ -7,10 +7,10 @@ service MainService {
     entity JobHistory       as projection on btpjapanprojectdemo.JobHistory;
     entity ClearingLog      as projection on btpjapanprojectdemo.ClearingLog;
 
-    action startReplicatingPO() returns array of POMapping;
+    action startReplicatingPO()    returns array of POMapping;
 
-    action startReplicatingPOJob @(restrict: [{
+    action startReplicatingPOJob() returns String @(restrict: [{
         grant: 'WRITE',
         to   : 'jobscheduler'
-    }])()                       returns array of POMapping;
+    }]);
 }
