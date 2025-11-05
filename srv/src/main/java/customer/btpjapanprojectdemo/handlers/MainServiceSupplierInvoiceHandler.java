@@ -23,8 +23,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.sap.cds.ResultBuilder;
+import com.sap.cds.ql.Insert;
 import com.sap.cds.ql.cqn.AnalysisResult;
 import com.sap.cds.ql.cqn.CqnAnalyzer;
+import com.sap.cds.ql.cqn.CqnInsert;
 import com.sap.cds.ql.cqn.CqnSelect;
 import com.sap.cds.services.cds.CdsReadEventContext;
 import com.sap.cds.services.cds.CdsCreateEventContext;
@@ -35,6 +37,8 @@ import com.sap.cds.services.handler.annotations.On;
 import com.sap.cds.services.handler.annotations.ServiceName;
 import com.sap.cds.services.persistence.PersistenceService;
 
+import cds.gen.btpjapanprojectdemo.InvoiceLog;
+import cds.gen.mainservice.InvoiceLog_;
 import cds.gen.mainservice.MainService_;
 import cds.gen.mainservice.SupplierInvoice;
 import cds.gen.mainservice.SupplierInvoiceReplicateInvoicesContext;
@@ -60,6 +64,7 @@ public class MainServiceSupplierInvoiceHandler implements EventHandler {
     private String csrfToken;
     private List<String> cookieList;
     private HashMap<String, InvoiceGetResponseDTO> getResponseList;
+    private HashMap<String, String> poList;
 
     private final RestTemplate restTemplate;
 
@@ -69,6 +74,7 @@ public class MainServiceSupplierInvoiceHandler implements EventHandler {
         this.restTemplate = createRestTemplate();
         this.db = persistenceService;
         this.getResponseList = new HashMap<>();
+        this.poList = new HashMap<>();
     }
 
     private RestTemplate createRestTemplate() {
@@ -223,6 +229,8 @@ public class MainServiceSupplierInvoiceHandler implements EventHandler {
 
                 String successMsg = String.format("Invoice Posted %s/%s", invoiceNo, fiscalYear);
 
+                logInvoiceReplication(invoiceGetResponseDTO, invoicePostRequestDTO, invoiceNo, fiscalYear);
+
                 context.getMessages().success(successMsg);
                 context.setCompleted();
             }
@@ -232,6 +240,33 @@ public class MainServiceSupplierInvoiceHandler implements EventHandler {
         }
 
         context.setCompleted();
+    }
+
+    private void logInvoiceReplication(InvoiceGetResponseDTO invoiceGetResponseDTO, InvoicePostRequestDTO invoicePostRequestDTO, String invoiceNo, String fiscalYear) {
+        InvoiceLog invoiceLog = InvoiceLog.create();
+
+                invoiceLog.setInvoiceReplicated(invoiceGetResponseDTO.getSupplierInvoice());
+                invoiceLog.setYearReplicated(invoiceGetResponseDTO.getFiscalYear());
+
+                LocalDate postingDateRepli = convertJsonToDate(invoiceGetResponseDTO.getPostingDate());
+                invoiceLog.setPostingPeriodReplicated(String.valueOf(postingDateRepli.getMonthValue()));
+
+                invoiceLog.setPOReplicated(poList.get(invoiceGetResponseDTO.getSupplierInvoice()));
+                
+                invoiceLog.setInvoiceOriginal(invoiceNo);
+                invoiceLog.setYearOriginal(fiscalYear);
+
+                
+                LocalDate postingDateOri = convertJsonToDate(invoicePostRequestDTO.getPostingDate());
+                invoiceLog.setPostingPeriodOriginal(String.valueOf(postingDateOri.getMonthValue()));
+
+                invoiceLog.setPOOriginal(poList.get(invoiceGetResponseDTO.getSupplierInvoice()));
+
+                invoiceLog.setTimestamp(Instant.now());
+                
+                CqnInsert insert = Insert.into(InvoiceLog_.CDS_NAME).entry(invoiceLog);
+
+                db.run(insert);
     }
 
     private InvoicePostRequestDTO mapResponseRequest(InvoiceGetResponseDTO invoiceGetResponseDTO) {
@@ -348,6 +383,7 @@ public class MainServiceSupplierInvoiceHandler implements EventHandler {
 
                     result.setSupplierInvoiceItem(invoicePORefObject.getSupplierInvoiceItem());
                     result.setPurchaseOrder(invoicePORefObject.getPurchaseOrder());
+                    poList.put(invoiceGetResponseDTO.getSupplierInvoice(), invoicePORefObject.getPurchaseOrder());
                     result.setPurchaseOrderItem(invoicePORefObject.getPurchaseOrderItem());
                     result.setPlant(invoicePORefObject.getPlant());
                     result.setReferenceDocument(invoicePORefObject.getReferenceDocument());
