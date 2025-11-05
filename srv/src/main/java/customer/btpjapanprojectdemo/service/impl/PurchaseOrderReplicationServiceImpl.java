@@ -153,7 +153,7 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                         .scheme("https")
                                         .host("my200132.s4hana.sapcloud.cn")
                                         .path(poBodyMultiHeaderUrlTemp)
-                                        .queryParam("",
+                                        .queryParam("$expand",
                                                         "to_PurchaseOrderNote")
                                         .build()
                                         .toUriString();
@@ -177,8 +177,8 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                         .scheme("https")
                                         .host("my200132.s4hana.sapcloud.cn")
                                         .path("/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrderItem")
-                                        .queryParam("", poBodyMultiItemFilter)
-                                        .queryParam("",
+                                        .queryParam("$filter", poBodyMultiItemFilter)
+                                        .queryParam("$expand",
                                                         "to_ScheduleLine/to_SubcontractingComponent,to_AccountAssignment,to_PurchaseOrderItemNote")
                                         .build()
                                         .toUriString();
@@ -189,9 +189,12 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                         null,
                                         SAPCloudODataClient.SAPCommUser.PURCHASE_ORDER);
 
+                        ObjectNode navigationResultsWrapper = objectMapper.createObjectNode();
+                        navigationResultsWrapper.set("results", poBodyMultiItem);
+
                         // Combine: Replace to_PurchaseOrderItem in header
                         ObjectNode poBodyMultiCombined = ((ObjectNode) poBodyMultiHeader).deepCopy();
-                        poBodyMultiCombined.replace("to_PurchaseOrderItem", poBodyMultiItem);
+                        poBodyMultiCombined.replace("to_PurchaseOrderItem", navigationResultsWrapper);
                         poBodyResults.add(poBodyMultiCombined);
                 });
                 return poBodyResults;
@@ -206,22 +209,17 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                                 poJsonNode,
                                                 PurchaseOrderDTO.class);
 
-                                // Store original info for mapping
+                                // Step 2: Store original info for mapping
                                 String originalPoNumber = originalPO.getPurchaseOrder();
                                 String companyCode = originalPO.getCompanyCode();
                                 String supplier = originalPO.getSupplier();
 
-                                // Step 2: Clean the DTO for POST
+                                // Step 3: Clean the DTO for POST
                                 PurchaseOrderDTO cleanedPO = PurchaseOrderPostPrepare
                                                 .preparePurchaseOrderBody(originalPO);
 
                                 // Step 3: Convert DTO to JSON string
                                 String postPayload = objectMapper.writeValueAsString(cleanedPO);
-
-                                // Debug: Print the payload (optional)
-                                System.out.println("=== POST PAYLOAD ===");
-                                System.out.println(objectMapper.writerWithDefaultPrettyPrinter()
-                                                .writeValueAsString(cleanedPO));
 
                                 // Step 4: POST to create replica PO
                                 String poReplicateUrl = UriComponentsBuilder.newInstance()
@@ -244,7 +242,7 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
 
                                 String replicaPoNumber = replicatedPO.getPurchaseOrder();
 
-                                // Map original items to replica items
+                                // Step 6: Map original items to replica items
                                 List<PurchaseOrderItemDTO> originalItems = originalPO.getToPurchaseOrderItem()
                                                 .getResults();
                                 List<PurchaseOrderItemDTO> replicaItems = replicatedPO.getToPurchaseOrderItem()
@@ -262,7 +260,6 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                 }
 
                         } catch (Exception e) {
-                                System.err.println("Failed to replicating PO: " + e.getMessage());
                                 throw new BusinessException("Failed to replicate PO " + e);
                         }
                 });
