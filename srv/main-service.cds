@@ -8,4 +8,9 @@ service MainService {
     entity ClearingLog      as projection on btpjapanprojectdemo.ClearingLog;
 
     action startReplicatingPO() returns array of POMapping;
+
+    action startReplicatingPOJob @(restrict: [{
+        grant: 'WRITE',
+        to   : 'jobscheduler'
+    }])()                       returns array of POMapping;
 }
