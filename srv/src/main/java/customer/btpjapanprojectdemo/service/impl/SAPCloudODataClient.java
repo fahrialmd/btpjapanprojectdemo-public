@@ -177,7 +177,8 @@ public class SAPCloudODataClient {
             return root;
         }
 
-        // Choose to return a collection inside "results" or just single object
+        // If the result is a collection, odata will put it into an array called
+        // "results"
         return data.has("results") ? data.get("results") : data;
     }
 
