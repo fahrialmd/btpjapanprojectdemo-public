@@ -1,5 +1,7 @@
 package customer.btpjapanprojectdemo.handlers;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.sap.cds.services.handler.EventHandler;
@@ -23,7 +25,7 @@ public class MainServicePOMappingHandler implements EventHandler {
 
     @On(event = StartReplicatingPOContext.CDS_NAME)
     public void onStartReplicatingPO(StartReplicatingPOContext context) {
-        POMapping result = PurchaseOrderReplicationService.startReplicatingPO(context);
+        List<POMapping> result = PurchaseOrderReplicationService.startReplicatingPO(context);
         context.getMessages().success("PO Replicated");
         context.setResult(result);
         // context.setCompleted();

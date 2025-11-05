@@ -91,10 +91,8 @@ public class SAPCloudODataClient {
 
             return parseResponse(response);
 
-        } catch (RestClientException e) {
-            throw new BusinessException("OData API call failed " + e.getMessage());
         } catch (Exception e) {
-            throw new BusinessException("Failed to process OData response", e);
+            throw new BusinessException("OData API call failed " + e.getMessage());
         }
     }
 

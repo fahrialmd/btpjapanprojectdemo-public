@@ -7,5 +7,5 @@ service MainService {
     entity JobHistory       as projection on btpjapanprojectdemo.JobHistory;
     entity ClearingLog      as projection on btpjapanprojectdemo.ClearingLog;
 
-    action startReplicatingPO() returns POMapping;
+    action startReplicatingPO() returns array of POMapping;
 }

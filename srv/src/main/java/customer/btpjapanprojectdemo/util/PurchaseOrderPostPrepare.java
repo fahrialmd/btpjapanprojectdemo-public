@@ -147,7 +147,7 @@ public class PurchaseOrderPostPrepare {
          */
         private static PurchaseOrderDTO.NavigationResults<PurchaseOrderItemNoteDTO> createPurchaseOrderItemNote(
                         String originalPO, String originalPOItem) {
-                String headerNoteText = "Original PO: " + originalPO + " and "
+                String headerNoteText = "Original PO: " + originalPO + " and Original PO Item: "
                                 + originalPOItem;
 
                 PurchaseOrderItemNoteDTO poItemNote = PurchaseOrderItemNoteDTO.builder()
