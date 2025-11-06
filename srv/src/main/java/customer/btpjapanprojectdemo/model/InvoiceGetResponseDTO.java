@@ -342,7 +342,7 @@ public class InvoiceGetResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public class ToSuplrInvcItemPurOrdRef {
-        public ArrayList<SuplrInvcItemPurOrdRefresult> results;
+        public ArrayList<SuplrInvcItemPurOrdRefResultGet> results;
     }
 
     @Data
@@ -370,7 +370,7 @@ public class InvoiceGetResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public class ToSupplierInvoiceTax {
-        public ArrayList<SupplierInvoiceTaxresult> results;
+        public ArrayList<SupplierInvoiceTaxResultGet> results;
     }
 
     @Data
@@ -390,7 +390,7 @@ public class InvoiceGetResponseDTO {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public class Metadata {
+    public static class Metadata {
         public String id;
         public String uri;
         public String type;
@@ -399,7 +399,7 @@ public class InvoiceGetResponseDTO {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public class SuplrInvcItemPurOrdRefresult {
+    public static class SuplrInvcItemPurOrdRefResultGet {
 
         public Metadata __metadata;
 
@@ -544,20 +544,181 @@ public class InvoiceGetResponseDTO {
         @JsonProperty("NL_ChainLiabilityPercent")
         public String nL_ChainLiabilityPercent;
 
-        public ToSupplierInvoiceItmAcctAssgmt to_SupplierInvoiceItmAcctAssgmt;
+        public ToSupplierInvoiceItmAcctAssgmtGet to_SupplierInvoiceItmAcctAssgmt;
     }
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class ToSupplierInvoiceItmAcctAssgmt {
-        public ArrayList<String> results;
+    public static class ToSupplierInvoiceItmAcctAssgmtGet {
+        public ArrayList<SupplierInvoiceItmAcctAssgmtResultGet> results;
     }
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public class SupplierInvoiceTaxresult {
+    public static class SupplierInvoiceItmAcctAssgmtResultGet {
+        public Metadata __metadata;
+
+        @JsonProperty("SupplierInvoice")
+        public String supplierInvoice;
+
+        @JsonProperty("FiscalYear")
+        public String fiscalYear;
+
+        @JsonProperty("SupplierInvoiceItem")
+        public String supplierInvoiceItem;
+
+        @JsonProperty("OrdinalNumber")
+        public String ordinalNumber;
+
+        @JsonProperty("CostCenter")
+        public String costCenter;
+
+        @JsonProperty("ControllingArea")
+        public String controllingArea;
+
+        @JsonProperty("BusinessArea")
+        public String businessArea;
+
+        @JsonProperty("ProfitCenter")
+        public String profitCenter;
+
+        @JsonProperty("FunctionalArea")
+        public String functionalArea;
+
+        @JsonProperty("GLAccount")
+        public String glAccount;
+
+        @JsonProperty("SalesOrder")
+        public String salesOrder;
+
+        @JsonProperty("SalesOrderItem")
+        public String salesOrderItem;
+
+        @JsonProperty("CostObject")
+        public String costObject;
+
+        @JsonProperty("CostCtrActivityType")
+        public String costCtrActivityType;
+
+        @JsonProperty("BusinessProcess")
+        public String businessProcess;
+
+        @JsonProperty("WBSElement")
+        public String wbSElement;
+
+        @JsonProperty("DocumentCurrency")
+        public String documentCurrency;
+
+        @JsonProperty("SuplrInvcAcctAssignmentAmount")
+        public String suplrInvcAcctAssignmentAmount;
+
+        @JsonProperty("PurchaseOrderQuantityUnit")
+        public String purchaseOrderQuantityUnit;
+
+        @JsonProperty("PurchaseOrderQtyUnitSAPCode")
+        public String purchaseOrderQtyUnitSAPCode;
+
+        @JsonProperty("PurchaseOrderQtyUnitISOCode")
+        public String purchaseOrderQtyUnitISOCode;
+
+        @JsonProperty("Quantity")
+        public String quantity;
+
+        @JsonProperty("TaxCode")
+        public String taxCode;
+
+        @JsonProperty("AccountAssignmentNumber")
+        public String accountAssignmentNumber;
+
+        @JsonProperty("AccountAssignmentIsUnplanned")
+        public boolean accountAssignmentIsUnplanned;
+
+        @JsonProperty("PersonnelNumber")
+        public String personnelNumber;
+
+        @JsonProperty("WorkItem")
+        public String workItem;
+
+        @JsonProperty("MasterFixedAsset")
+        public String masterFixedAsset;
+
+        @JsonProperty("FixedAsset")
+        public String fixedAsset;
+
+        @JsonProperty("DebitCreditCode")
+        public String debitCreditCode;
+
+        @JsonProperty("TaxJurisdiction")
+        public String taxJurisdiction;
+
+        @JsonProperty("InternalOrder")
+        public String internalOrder;
+
+        @JsonProperty("ProjectNetworkInternalID")
+        public String projectNetworkInternalID;
+
+        @JsonProperty("NetworkActivityInternalID")
+        public String networkActivityInternalID;
+
+        @JsonProperty("ProjectNetwork")
+        public String projectNetwork;
+
+        @JsonProperty("NetworkActivity")
+        public String networkActivity;
+
+        @JsonProperty("CommitmentItem")
+        public String commitmentItem;
+
+        @JsonProperty("FundsCenter")
+        public String fundsCenter;
+
+        @JsonProperty("Fund")
+        public String fund;
+
+        @JsonProperty("GrantID")
+        public String grantID;
+
+        @JsonProperty("PartnerBusinessArea")
+        public String partnerBusinessArea;
+
+        @JsonProperty("CompanyCode")
+        public String companyCode;
+
+        @JsonProperty("SuplrInvcAccountAssignmentText")
+        public String suplrInvcAccountAssignmentText;
+
+        @JsonProperty("PurchaseOrderPriceUnit")
+        public String purchaseOrderPriceUnit;
+
+        @JsonProperty("PurchaseOrderPriceUnitSAPCode")
+        public String purchaseOrderPriceUnitSAPCode;
+
+        @JsonProperty("PurchaseOrderPriceUnitISOCode")
+        public String purchaseOrderPriceUnitISOCode;
+
+        @JsonProperty("QuantityInPurchaseOrderUnit")
+        public String quantityInPurchaseOrderUnit;
+
+        @JsonProperty("ProfitabilitySegment")
+        public String profitabilitySegment;
+
+        @JsonProperty("BudgetPeriod")
+        public String budgetPeriod;
+
+        @JsonProperty("TaxCountry")
+        public String taxCountry;
+
+        @JsonProperty("TaxDeterminationDate")
+        public String taxDeterminationDate;
+
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SupplierInvoiceTaxResultGet {
 
         public Metadata __metadata;
 

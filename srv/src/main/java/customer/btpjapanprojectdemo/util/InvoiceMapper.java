@@ -8,13 +8,16 @@ import java.util.ArrayList;
 
 import cds.gen.mainservice.SupplierInvoice;
 import customer.btpjapanprojectdemo.model.InvoiceGetResponseDTO;
+import customer.btpjapanprojectdemo.model.InvoiceGetResponseDTO.SuplrInvcItemPurOrdRefResultGet;
 import customer.btpjapanprojectdemo.model.InvoicePostRequestDTO;
-import customer.btpjapanprojectdemo.model.InvoicePostRequestDTO.Result;
+import customer.btpjapanprojectdemo.model.InvoicePostRequestDTO.SuplrInvcItemPurOrdRefResultPost;
+import customer.btpjapanprojectdemo.model.InvoicePostRequestDTO.SupplierInvoiceItmAcctAssgmtResultPost;
 import customer.btpjapanprojectdemo.model.InvoicePostRequestDTO.ToSuplrInvcItemPurOrdRef;
 import customer.btpjapanprojectdemo.model.InvoicePostRequestDTO.ToSupplierInvoiceItmAcctAssgmt;
 
 public class InvoiceMapper {
-    public static SupplierInvoice invoiceGetResponseDTOtoSupplierInvoice(InvoiceGetResponseDTO invoiceGetResponseDTO) {
+    public static SupplierInvoice invoiceGetResponseDTOtoSupplierInvoice(
+            InvoiceGetResponseDTO invoiceGetResponseDTO) {
         SupplierInvoice supplierInvoice = SupplierInvoice.create();
 
         supplierInvoice.setInvoiceNo(invoiceGetResponseDTO.getSupplierInvoice());
@@ -41,7 +44,8 @@ public class InvoiceMapper {
         invoicePostRequestDTO.setDocumentDate(invoiceGetResponseDTO.getDocumentDate());
         invoicePostRequestDTO.setPostingDate(invoiceGetResponseDTO.getPostingDate());
         invoicePostRequestDTO
-                .setSupplierInvoiceIDByInvcgParty(invoiceGetResponseDTO.getSupplierInvoiceIDByInvcgParty());
+                .setSupplierInvoiceIDByInvcgParty(
+                        invoiceGetResponseDTO.getSupplierInvoiceIDByInvcgParty());
         invoicePostRequestDTO.setInvoicingParty(invoiceGetResponseDTO.getInvoicingParty());
         invoicePostRequestDTO.setDocumentCurrency(invoiceGetResponseDTO.getDocumentCurrency());
         invoicePostRequestDTO.setInvoiceGrossAmount(invoiceGetResponseDTO.getInvoiceGrossAmount());
@@ -60,30 +64,40 @@ public class InvoiceMapper {
         invoicePostRequestDTO.setAccountingDocumentType(invoiceGetResponseDTO.getAccountingDocumentType());
         invoicePostRequestDTO.setBpBankAccountInternalID(invoiceGetResponseDTO.getBPBankAccountInternalID());
         invoicePostRequestDTO.setSupplierInvoiceStatus(invoiceGetResponseDTO.getSupplierInvoiceStatus());
-        invoicePostRequestDTO.setIndirectQuotedExchangeRate(invoiceGetResponseDTO.getIndirectQuotedExchangeRate());
+        invoicePostRequestDTO
+                .setIndirectQuotedExchangeRate(invoiceGetResponseDTO.getIndirectQuotedExchangeRate());
         invoicePostRequestDTO.setDirectQuotedExchangeRate(invoiceGetResponseDTO.getDirectQuotedExchangeRate());
         invoicePostRequestDTO
-                .setStateCentralBankPaymentReason(invoiceGetResponseDTO.getStateCentralBankPaymentReason());
+                .setStateCentralBankPaymentReason(
+                        invoiceGetResponseDTO.getStateCentralBankPaymentReason());
         invoicePostRequestDTO.setSupplyingCountry(invoiceGetResponseDTO.getSupplyingCountry());
         invoicePostRequestDTO.setPaymentMethod(invoiceGetResponseDTO.getPaymentMethod());
         invoicePostRequestDTO.setPaymentMethodSupplement(invoiceGetResponseDTO.getPaymentMethodSupplement());
         invoicePostRequestDTO.setPaymentReference(invoiceGetResponseDTO.getPaymentReference());
         invoicePostRequestDTO.setInvoiceReference(invoiceGetResponseDTO.getInvoiceReference());
-        invoicePostRequestDTO.setInvoiceReferenceFiscalYear(invoiceGetResponseDTO.getInvoiceReferenceFiscalYear());
-        invoicePostRequestDTO.setFixedCashDiscount(invoiceGetResponseDTO.getFixedCashDiscount());
-        invoicePostRequestDTO.setUnplannedDeliveryCostTaxCode(invoiceGetResponseDTO.getUnplannedDeliveryCostTaxCode());
         invoicePostRequestDTO
-                .setUnplndDelivCostTaxJurisdiction(invoiceGetResponseDTO.getUnplndDelivCostTaxJurisdiction());
-        invoicePostRequestDTO.setUnplndDeliveryCostTaxCountry(invoiceGetResponseDTO.getUnplndDeliveryCostTaxCountry());
+                .setInvoiceReferenceFiscalYear(invoiceGetResponseDTO.getInvoiceReferenceFiscalYear());
+        invoicePostRequestDTO.setFixedCashDiscount(invoiceGetResponseDTO.getFixedCashDiscount());
+        invoicePostRequestDTO.setUnplannedDeliveryCostTaxCode(
+                invoiceGetResponseDTO.getUnplannedDeliveryCostTaxCode());
+        invoicePostRequestDTO
+                .setUnplndDelivCostTaxJurisdiction(
+                        invoiceGetResponseDTO.getUnplndDelivCostTaxJurisdiction());
+        invoicePostRequestDTO.setUnplndDeliveryCostTaxCountry(
+                invoiceGetResponseDTO.getUnplndDeliveryCostTaxCountry());
         invoicePostRequestDTO.setAssignmentReference(invoiceGetResponseDTO.getAssignmentReference());
-        invoicePostRequestDTO.setSupplierPostingLineItemText(invoiceGetResponseDTO.getSupplierPostingLineItemText());
-        invoicePostRequestDTO.setTaxIsCalculatedAutomatically(invoiceGetResponseDTO.isTaxIsCalculatedAutomatically());
+        invoicePostRequestDTO
+                .setSupplierPostingLineItemText(invoiceGetResponseDTO.getSupplierPostingLineItemText());
+        invoicePostRequestDTO.setTaxIsCalculatedAutomatically(
+                invoiceGetResponseDTO.isTaxIsCalculatedAutomatically());
         invoicePostRequestDTO.setBusinessPlace(invoiceGetResponseDTO.getBusinessPlace());
         invoicePostRequestDTO.setBusinessSectionCode(invoiceGetResponseDTO.getBusinessSectionCode());
         invoicePostRequestDTO.setBusinessArea(invoiceGetResponseDTO.getBusinessArea());
         invoicePostRequestDTO
-                .setSuplrInvcIsCapitalGoodsRelated(invoiceGetResponseDTO.isSuplrInvcIsCapitalGoodsRelated());
-        invoicePostRequestDTO.setSupplierInvoiceIsCreditMemo(invoiceGetResponseDTO.getSupplierInvoiceIsCreditMemo());
+                .setSuplrInvcIsCapitalGoodsRelated(
+                        invoiceGetResponseDTO.isSuplrInvcIsCapitalGoodsRelated());
+        invoicePostRequestDTO
+                .setSupplierInvoiceIsCreditMemo(invoiceGetResponseDTO.getSupplierInvoiceIsCreditMemo());
         invoicePostRequestDTO.setPaytSlipWthRefSubscriber(invoiceGetResponseDTO.getPaytSlipWthRefSubscriber());
         invoicePostRequestDTO.setPaytSlipWthRefCheckDigit(invoiceGetResponseDTO.getPaytSlipWthRefCheckDigit());
         invoicePostRequestDTO.setPaytSlipWthRefReference(invoiceGetResponseDTO.getPaytSlipWthRefReference());
@@ -92,13 +106,16 @@ public class InvoiceMapper {
         invoicePostRequestDTO.setTaxFulfillmentDate(invoiceGetResponseDTO.getTaxFulfillmentDate());
         invoicePostRequestDTO.setInvoiceReceiptDate(invoiceGetResponseDTO.getInvoiceReceiptDate());
         invoicePostRequestDTO
-                .setDeliveryOfGoodsReportingCntry(invoiceGetResponseDTO.getDeliveryOfGoodsReportingCntry());
+                .setDeliveryOfGoodsReportingCntry(
+                        invoiceGetResponseDTO.getDeliveryOfGoodsReportingCntry());
         invoicePostRequestDTO.setSupplierVATRegistration(invoiceGetResponseDTO.getSupplierVATRegistration());
         invoicePostRequestDTO.setEuTriangularDeal(invoiceGetResponseDTO.isEUTriangularDeal());
         invoicePostRequestDTO
-                .setSuplrInvcDebitCrdtCodeDelivery(invoiceGetResponseDTO.getSuplrInvcDebitCrdtCodeDelivery());
+                .setSuplrInvcDebitCrdtCodeDelivery(
+                        invoiceGetResponseDTO.getSuplrInvcDebitCrdtCodeDelivery());
         invoicePostRequestDTO
-                .setSuplrInvcDebitCrdtCodeReturns(invoiceGetResponseDTO.getSuplrInvcDebitCrdtCodeReturns());
+                .setSuplrInvcDebitCrdtCodeReturns(
+                        invoiceGetResponseDTO.getSuplrInvcDebitCrdtCodeReturns());
         invoicePostRequestDTO.setRetentionDueDate(invoiceGetResponseDTO.getRetentionDueDate());
         invoicePostRequestDTO.setPaymentReason(invoiceGetResponseDTO.getPaymentReason());
         invoicePostRequestDTO.setHouseBank(invoiceGetResponseDTO.getHouseBank());
@@ -106,27 +123,52 @@ public class InvoiceMapper {
         invoicePostRequestDTO.setAlternativePayeePayer(invoiceGetResponseDTO.getAlternativePayeePayer());
         invoicePostRequestDTO.setIn_GSTPartner(invoiceGetResponseDTO.getIN_GSTPartner());
         invoicePostRequestDTO.setIn_GSTPlaceOfSupply(invoiceGetResponseDTO.getIN_GSTPlaceOfSupply());
-        invoicePostRequestDTO.setIn_InvoiceReferenceNumber(invoiceGetResponseDTO.getIN_InvoiceReferenceNumber());
-        invoicePostRequestDTO.setJrnlEntryCntrySpecificRef1(invoiceGetResponseDTO.getJrnlEntryCntrySpecificRef1());
-        invoicePostRequestDTO.setJrnlEntryCntrySpecificDate1(invoiceGetResponseDTO.getJrnlEntryCntrySpecificDate1());
-        invoicePostRequestDTO.setJrnlEntryCntrySpecificRef2(invoiceGetResponseDTO.getJrnlEntryCntrySpecificRef2());
-        invoicePostRequestDTO.setJrnlEntryCntrySpecificDate2(invoiceGetResponseDTO.getJrnlEntryCntrySpecificDate2());
-        invoicePostRequestDTO.setJrnlEntryCntrySpecificRef3(invoiceGetResponseDTO.getJrnlEntryCntrySpecificRef3());
-        invoicePostRequestDTO.setJrnlEntryCntrySpecificDate3(invoiceGetResponseDTO.getJrnlEntryCntrySpecificDate3());
-        invoicePostRequestDTO.setJrnlEntryCntrySpecificRef4(invoiceGetResponseDTO.getJrnlEntryCntrySpecificRef4());
-        invoicePostRequestDTO.setJrnlEntryCntrySpecificDate4(invoiceGetResponseDTO.getJrnlEntryCntrySpecificDate4());
-        invoicePostRequestDTO.setJrnlEntryCntrySpecificRef5(invoiceGetResponseDTO.getJrnlEntryCntrySpecificRef5());
-        invoicePostRequestDTO.setJrnlEntryCntrySpecificDate5(invoiceGetResponseDTO.getJrnlEntryCntrySpecificDate5());
-        invoicePostRequestDTO.setJrnlEntryCntrySpecificBP1(invoiceGetResponseDTO.getJrnlEntryCntrySpecificBP1());
-        invoicePostRequestDTO.setJrnlEntryCntrySpecificBP2(invoiceGetResponseDTO.getJrnlEntryCntrySpecificBP2());
+        invoicePostRequestDTO
+                .setIn_InvoiceReferenceNumber(invoiceGetResponseDTO.getIN_InvoiceReferenceNumber());
+        invoicePostRequestDTO
+                .setJrnlEntryCntrySpecificRef1(invoiceGetResponseDTO.getJrnlEntryCntrySpecificRef1());
+        invoicePostRequestDTO
+                .setJrnlEntryCntrySpecificDate1(invoiceGetResponseDTO.getJrnlEntryCntrySpecificDate1());
+        invoicePostRequestDTO
+                .setJrnlEntryCntrySpecificRef2(invoiceGetResponseDTO.getJrnlEntryCntrySpecificRef2());
+        invoicePostRequestDTO
+                .setJrnlEntryCntrySpecificDate2(invoiceGetResponseDTO.getJrnlEntryCntrySpecificDate2());
+        invoicePostRequestDTO
+                .setJrnlEntryCntrySpecificRef3(invoiceGetResponseDTO.getJrnlEntryCntrySpecificRef3());
+        invoicePostRequestDTO
+                .setJrnlEntryCntrySpecificDate3(invoiceGetResponseDTO.getJrnlEntryCntrySpecificDate3());
+        invoicePostRequestDTO
+                .setJrnlEntryCntrySpecificRef4(invoiceGetResponseDTO.getJrnlEntryCntrySpecificRef4());
+        invoicePostRequestDTO
+                .setJrnlEntryCntrySpecificDate4(invoiceGetResponseDTO.getJrnlEntryCntrySpecificDate4());
+        invoicePostRequestDTO
+                .setJrnlEntryCntrySpecificRef5(invoiceGetResponseDTO.getJrnlEntryCntrySpecificRef5());
+        invoicePostRequestDTO
+                .setJrnlEntryCntrySpecificDate5(invoiceGetResponseDTO.getJrnlEntryCntrySpecificDate5());
+        invoicePostRequestDTO
+                .setJrnlEntryCntrySpecificBP1(invoiceGetResponseDTO.getJrnlEntryCntrySpecificBP1());
+        invoicePostRequestDTO
+                .setJrnlEntryCntrySpecificBP2(invoiceGetResponseDTO.getJrnlEntryCntrySpecificBP2());
 
         invoicePostRequestDTO.setTo_BR_SupplierInvoiceNFDocument(null);
 
         // Set to_SuplrInvcItemPurOrdRef
-        ArrayList<Result> poRefList = new ArrayList<>();
+
+        ArrayList<SuplrInvcItemPurOrdRefResultPost> poRefList = responsePORefToRequestPORef(invoiceGetResponseDTO);
+
+        ToSuplrInvcItemPurOrdRef invoicePORef = invoicePostRequestDTO.new ToSuplrInvcItemPurOrdRef();
+        invoicePORef.setResults(poRefList);
+
+        invoicePostRequestDTO.setTo_SuplrInvcItemPurOrdRef(invoicePORef);
+
+        return invoicePostRequestDTO;
+    }
+
+    public static ArrayList<SuplrInvcItemPurOrdRefResultPost> responsePORefToRequestPORef(InvoiceGetResponseDTO invoiceGetResponseDTO) {
+        ArrayList<SuplrInvcItemPurOrdRefResultPost> poRefList = new ArrayList<>();
 
         invoiceGetResponseDTO.getTo_SuplrInvcItemPurOrdRef().getResults().forEach(poRefResponse -> {
-            Result poRefRequest = new Result();
+            SuplrInvcItemPurOrdRefResultPost poRefRequest = new SuplrInvcItemPurOrdRefResultPost();
 
             poRefRequest.setSupplierInvoiceItem(poRefResponse.getSupplierInvoiceItem());
             poRefRequest.setPurchaseOrder(poRefResponse.getPurchaseOrder());
@@ -172,21 +214,73 @@ public class InvoiceMapper {
             poRefRequest.setNl_ChainLiabilityDuration(poRefResponse.getNL_ChainLiabilityDuration());
             poRefRequest.setNl_ChainLiabilityPercent(poRefResponse.getNL_ChainLiabilityPercent());
 
-            ToSupplierInvoiceItmAcctAssgmt toSupplierInvoiceItmAcctAssgmt = invoicePostRequestDTO.new ToSupplierInvoiceItmAcctAssgmt();
-            toSupplierInvoiceItmAcctAssgmt.results = new ArrayList<>();
+            ArrayList<SupplierInvoiceItmAcctAssgmtResultPost> actAssgList = responseActAssgTorequestActAssg(poRefResponse);
+
+
+            ToSupplierInvoiceItmAcctAssgmt toSupplierInvoiceItmAcctAssgmt = new ToSupplierInvoiceItmAcctAssgmt();
+            toSupplierInvoiceItmAcctAssgmt.setResults(actAssgList);
 
             poRefRequest.setTo_SupplierInvoiceItmAcctAssgmt(toSupplierInvoiceItmAcctAssgmt);
 
             poRefList.add(poRefRequest);
         });
 
+        return poRefList;
+    }
 
-    ToSuplrInvcItemPurOrdRef invoicePORef = invoicePostRequestDTO.new ToSuplrInvcItemPurOrdRef();
-    invoicePORef.setResults(poRefList);
+    public static ArrayList<SupplierInvoiceItmAcctAssgmtResultPost> responseActAssgTorequestActAssg(SuplrInvcItemPurOrdRefResultGet poRefResponse) {
+        ArrayList<SupplierInvoiceItmAcctAssgmtResultPost> actAssgList = new ArrayList<>();
 
-    invoicePostRequestDTO.setTo_SuplrInvcItemPurOrdRef(invoicePORef);
+        poRefResponse.getTo_SupplierInvoiceItmAcctAssgmt().getResults().forEach(actAssgResponse -> {
+                SupplierInvoiceItmAcctAssgmtResultPost actAssgRequest = new SupplierInvoiceItmAcctAssgmtResultPost();
 
-    return invoicePostRequestDTO;
+                actAssgRequest.setSupplierInvoiceItem(actAssgResponse.getSupplierInvoiceItem());
+                actAssgRequest.setOrdinalNumber(actAssgResponse.getOrdinalNumber());
+                actAssgRequest.setCostCenter(actAssgResponse.getCostCenter());
+                actAssgRequest.setControllingArea(actAssgResponse.getControllingArea());
+                actAssgRequest.setBusinessArea(actAssgResponse.getBusinessArea());
+                actAssgRequest.setProfitCenter(actAssgResponse.getProfitCenter());
+                actAssgRequest.setFunctionalArea(actAssgResponse.getFunctionalArea());
+                actAssgRequest.setGlAccount(actAssgResponse.getGlAccount());
+                actAssgRequest.setSalesOrder(actAssgResponse.getSalesOrder());
+                actAssgRequest.setSalesOrderItem(actAssgResponse.getSalesOrderItem());
+                actAssgRequest.setCostObject(actAssgResponse.getCostObject());
+                actAssgRequest.setWbSElement(actAssgResponse.getWbSElement());
+                actAssgRequest.setDocumentCurrency(actAssgResponse.getDocumentCurrency());
+                actAssgRequest.setSuplrInvcAcctAssignmentAmount(actAssgResponse.getSuplrInvcAcctAssignmentAmount());
+                actAssgRequest.setPurchaseOrderQuantityUnit(actAssgResponse.getPurchaseOrderQuantityUnit());
+                actAssgRequest.setPurchaseOrderQtyUnitSAPCode(actAssgResponse.getPurchaseOrderQtyUnitSAPCode());
+                actAssgRequest.setPurchaseOrderQtyUnitISOCode(actAssgResponse.getPurchaseOrderQtyUnitISOCode());
+                actAssgRequest.setQuantity(actAssgResponse.getQuantity());
+                actAssgRequest.setTaxCode(actAssgResponse.getTaxCode());
+                actAssgRequest.setAccountAssignmentNumber(actAssgResponse.getAccountAssignmentNumber());
+                actAssgRequest.setAccountAssignmentIsUnplanned(actAssgResponse.isAccountAssignmentIsUnplanned());
+                actAssgRequest.setPersonnelNumber(actAssgResponse.getPersonnelNumber());
+                actAssgRequest.setMasterFixedAsset(actAssgResponse.getMasterFixedAsset());
+                actAssgRequest.setFixedAsset(actAssgResponse.getFixedAsset());
+                actAssgRequest.setTaxJurisdiction(actAssgResponse.getTaxJurisdiction());
+                actAssgRequest.setInternalOrder(actAssgResponse.getInternalOrder());
+                actAssgRequest.setProjectNetworkInternalID(actAssgResponse.getProjectNetworkInternalID());
+                actAssgRequest.setNetworkActivityInternalID(actAssgResponse.getNetworkActivityInternalID());
+                actAssgRequest.setProjectNetwork(actAssgResponse.getProjectNetwork());
+                actAssgRequest.setNetworkActivity(actAssgResponse.getNetworkActivity());
+                actAssgRequest.setCommitmentItem(actAssgResponse.getCommitmentItem());
+                actAssgRequest.setFundsCenter(actAssgResponse.getFundsCenter());
+                actAssgRequest.setFund(actAssgResponse.getFund());
+                actAssgRequest.setGrantID(actAssgResponse.getGrantID());
+                actAssgRequest.setSuplrInvcAccountAssignmentText(actAssgResponse.getSuplrInvcAccountAssignmentText());
+                actAssgRequest.setPurchaseOrderPriceUnit(actAssgResponse.getPurchaseOrderPriceUnit());
+                actAssgRequest.setPurchaseOrderPriceUnitSAPCode(actAssgResponse.getPurchaseOrderPriceUnitSAPCode());
+                actAssgRequest.setPurchaseOrderPriceUnitISOCode(actAssgResponse.getPurchaseOrderPriceUnitISOCode());
+                actAssgRequest.setQuantityInPurchaseOrderUnit(actAssgResponse.getQuantityInPurchaseOrderUnit());
+                actAssgRequest.setProfitabilitySegment(actAssgResponse.getProfitabilitySegment());
+                actAssgRequest.setBudgetPeriod(actAssgResponse.getBudgetPeriod());
+                actAssgRequest.setTaxCountry(actAssgResponse.getTaxCountry());
+
+                actAssgList.add(actAssgRequest);
+
+            });
+        return actAssgList;
     }
 
     public static LocalDate convertJsonToDate(String jsonEpochDate) {
