@@ -335,7 +335,7 @@ public class InvoicePostRequestDTO {
         public String freightSupplier;
 
         @JsonProperty("IsNotCashDiscountLiable")
-        public boolean isNotCashDiscountLiable;
+        public boolean notCashDiscountLiable;
 
         @JsonProperty("RetentionAmountInDocCurrency")
         public String retentionAmountInDocCurrency;
@@ -359,7 +359,7 @@ public class InvoicePostRequestDTO {
         public String taxCountry;
 
         @JsonProperty("IsFinallyInvoiced")
-        public boolean isFinallyInvoiced;
+        public boolean finallyInvoiced;
 
         @JsonProperty("TaxDeterminationDate")
         public String taxDeterminationDate;

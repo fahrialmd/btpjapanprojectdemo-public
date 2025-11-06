@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import cds.gen.mainservice.SupplierInvoice;
 import customer.btpjapanprojectdemo.model.InvoiceGetResponseDTO;
@@ -37,7 +38,7 @@ public class InvoiceMapper {
         return supplierInvoice;
     }
 
-    public static InvoicePostRequestDTO getResponseToPostRequest(InvoiceGetResponseDTO invoiceGetResponseDTO) {
+    public static InvoicePostRequestDTO getResponseToPostRequest(InvoiceGetResponseDTO invoiceGetResponseDTO, HashMap<String,String> poRepToOriList) {
         InvoicePostRequestDTO invoicePostRequestDTO = new InvoicePostRequestDTO();
 
         invoicePostRequestDTO.setCompanyCode(invoiceGetResponseDTO.getCompanyCode());
@@ -154,7 +155,7 @@ public class InvoiceMapper {
 
         // Set to_SuplrInvcItemPurOrdRef
 
-        ArrayList<SuplrInvcItemPurOrdRefResultPost> poRefList = responsePORefToRequestPORef(invoiceGetResponseDTO);
+        ArrayList<SuplrInvcItemPurOrdRefResultPost> poRefList = responsePORefToRequestPORef(invoiceGetResponseDTO, poRepToOriList);
 
         ToSuplrInvcItemPurOrdRef invoicePORef = invoicePostRequestDTO.new ToSuplrInvcItemPurOrdRef();
         invoicePORef.setResults(poRefList);
@@ -164,14 +165,14 @@ public class InvoiceMapper {
         return invoicePostRequestDTO;
     }
 
-    public static ArrayList<SuplrInvcItemPurOrdRefResultPost> responsePORefToRequestPORef(InvoiceGetResponseDTO invoiceGetResponseDTO) {
+    public static ArrayList<SuplrInvcItemPurOrdRefResultPost> responsePORefToRequestPORef(InvoiceGetResponseDTO invoiceGetResponseDTO, HashMap<String,String> poRepToOriList) {
         ArrayList<SuplrInvcItemPurOrdRefResultPost> poRefList = new ArrayList<>();
 
         invoiceGetResponseDTO.getTo_SuplrInvcItemPurOrdRef().getResults().forEach(poRefResponse -> {
             SuplrInvcItemPurOrdRefResultPost poRefRequest = new SuplrInvcItemPurOrdRefResultPost();
 
             poRefRequest.setSupplierInvoiceItem(poRefResponse.getSupplierInvoiceItem());
-            poRefRequest.setPurchaseOrder(poRefResponse.getPurchaseOrder());
+            poRefRequest.setPurchaseOrder(poRepToOriList.get(poRefResponse.getPurchaseOrder()));
             poRefRequest.setPurchaseOrderItem(poRefResponse.getPurchaseOrderItem());
             poRefRequest.setPlant(poRefResponse.getPlant());
             poRefRequest.setReferenceDocument(poRefResponse.getReferenceDocument());

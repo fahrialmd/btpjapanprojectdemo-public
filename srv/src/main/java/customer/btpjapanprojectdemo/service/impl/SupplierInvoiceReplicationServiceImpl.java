@@ -4,7 +4,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,7 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
     private final SAPCloudODataClient sapCloudODataClient;
     private final ObjectMapper objectMapper;
     private HashMap<String, InvoiceGetResponseDTO> getResponseList;
+    private HashMap<String,String> poRepToOriList;
 
     public SupplierInvoiceReplicationServiceImpl(
             GenericCqnService genericCqnService,
@@ -46,6 +49,8 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
         this.objectMapper = new ObjectMapper();
         this.objectMapper.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, false);
         this.sapCloudODataClient = sapCloudODataClient;
+        this.getResponseList = new HashMap<>();
+        this.poRepToOriList = new HashMap<>();
     }
 
     @Override
@@ -55,20 +60,21 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
         List<InvoiceLog> invoiceLogList = genericCqnService.getInvoiceLogPO();
 
         // Fetch PO mapping that has no Subcontracting Invoice
-        List<String> poList = new ArrayList<>();
+        List<String> loggedPOList = new ArrayList<>();
         for (int i = 0; i < invoiceLogList.size(); i++) {
             InvoiceLog invoiceLog = invoiceLogList.get(i);
 
-            poList.add(invoiceLog.getPOOriginal());
+            loggedPOList.add(invoiceLog.getPOOriginal());
         }
 
-        List<POMapping> poMappingList = genericCqnService.getPoMappings(poList);
+        List<POMapping> poMappingList = genericCqnService.getPoMappings(loggedPOList);
 
-        List<String> oriPOList = new ArrayList<>();
+        Set<String> repliPOList = new HashSet<>();
         for (int i = 0; i < poMappingList.size(); i++) {
             POMapping poMapping = poMappingList.get(i);
 
-            poList.add(poMapping.getOriginalPo());
+            repliPOList.add(poMapping.getReplicaPo());
+            poRepToOriList.put(poMapping.getReplicaPo(), poMapping.getOriginalPo());
         }
 
         // Fetch Invoice from Read API
@@ -102,7 +108,7 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
 
                 // if standardPO is in the List of PO that has no Subcontracting Invoice
                 // then save Invoice
-                if (oriPOList.contains(standardPO)) {
+                if (repliPOList.contains(standardPO)) {
                     SupplierInvoice supplierInvoice = InvoiceMapper
                             .invoiceGetResponseDTOtoSupplierInvoice(invoiceObject);
                     getResponseList.put(invoiceObject.getSupplierInvoice(), invoiceObject);
@@ -125,7 +131,7 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
         // map invoice response to request
         InvoiceGetResponseDTO invoiceGetResponseDTO = getResponseList.get(supplierInvoiceNo);
 
-        InvoicePostRequestDTO invoicePostRequestDTO = InvoiceMapper.getResponseToPostRequest(invoiceGetResponseDTO);
+        InvoicePostRequestDTO invoicePostRequestDTO = InvoiceMapper.getResponseToPostRequest(invoiceGetResponseDTO, poRepToOriList);
 
         String jsonRequest = "";
         try {

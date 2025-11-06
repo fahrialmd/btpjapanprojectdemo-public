@@ -30,9 +30,9 @@ public class SAPCloudODataClient {
     private static final String ACCOUNTING_CLEARING_USER_AUTH = "";
 
     // Basic URL for CSRF
-    private static final String PURCHASE_ORDER_USER_URL = "https://my200132.s4hana.sapcloud.cn/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrder$top=1";
+    private static final String PURCHASE_ORDER_USER_URL = "https://my200132.s4hana.sapcloud.cn/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrder?$top=0";
     private static final String GOODS_MOVEMENT_USER_URL = "";
-    private static final String INVOICE_REGISTRATION_USER_URL = "https://my200132.s4hana.sapcloud.cn/sap/opu/odata/sap/API_SUPPLIERINVOICE_PROCESS_SRV/A_SupplierInvoice$top=1";
+    private static final String INVOICE_REGISTRATION_USER_URL = "https://my200132.s4hana.sapcloud.cn/sap/opu/odata/sap/API_SUPPLIERINVOICE_PROCESS_SRV/A_SupplierInvoice?$top=0";
     private static final String ACCOUNTING_CLEARING_USER_URL = "";
 
     // User session CSRF token
