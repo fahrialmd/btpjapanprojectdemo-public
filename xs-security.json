@@ -1,4 +1,5 @@
 {
+  "scopes": [],
   "attributes": [],
   "role-templates": [],
   "xsappname": "btpjapanprojectdemo-hybrid",
@@ -8,14 +9,5 @@
     "redirect-uris": [
       "http://localhost:5000/login/callback"
     ]
-  },
-  "scopes": [
-    {
-      "name": "$XSAPPNAME.jobscheduler",
-      "description": "JobScheduler Scope",
-      "grant-as-authority-to-apps": [
-        "$XSSERVICENAME(btpja-job)"
-      ]
-    }
-  ]
+  }
 }
