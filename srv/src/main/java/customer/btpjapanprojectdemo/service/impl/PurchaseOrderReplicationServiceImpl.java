@@ -80,7 +80,6 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                 String completeFilter = "PurchaseOrderItemCategory eq '3'";
                 if (mappedPoNumbers.size() > 0) {
                         List<String> mappedPoFilters = new ArrayList<>();
-
                         mappedPoNumbers.forEach(node -> {
                                 String filter = String.format(
                                                 "(PurchaseOrder eq '%s' and PurchaseOrderItem eq '%s')",
@@ -88,7 +87,6 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                                 node.get(POMapping.ORIGINAL_PO_ITEM).asText());
                                 mappedPoFilters.add(filter);
                         });
-
                         String mappedPoConditions = String.join(" or ", mappedPoFilters);
                         completeFilter = String.format(
                                         "PurchaseOrderItemCategory eq '3' and not (%s)",
@@ -101,7 +99,7 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                 .path("/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrderItem")
                                 .queryParam("$select", "PurchaseOrder,PurchaseOrderItem")
                                 .queryParam("$filter", completeFilter)
-                                .queryParam("$top", "1")
+                                .queryParam("$orderby", "PurchaseOrder")
                                 .build()
                                 .toUriString();
                 // Execute API Request
@@ -112,9 +110,17 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                 SAPCloudODataClient.SAPCommUser.PURCHASE_ORDER);
                 if (allPoNumbers == null || allPoNumbers.isEmpty()) {
                         throw new BusinessException("There is no subcontract purchase order to be processed");
-                } else {
-                        return allPoNumbers;
                 }
+                // Logic to only process one PO header at a time
+                ArrayNode allPoNumbersFiltered = objectMapper.createArrayNode();
+                String firstPurchaseOrder = allPoNumbers.get(0).path("PurchaseOrder").asText();
+                allPoNumbers.forEach(node -> {
+                        if (firstPurchaseOrder.equals(node.path("PurchaseOrder").asText())) {
+                                allPoNumbersFiltered.add(node);
+                        }
+                });
+                return allPoNumbersFiltered;
+
         }
 
         private ArrayNode groupedUnmappedPoNumbers(JsonNode unmappedPoNumbers) {
@@ -214,7 +220,7 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                 String companyCode = originalPO.getCompanyCode();
                                 String supplier = originalPO.getSupplier();
 
-                                // Step 3: Clean the DTO for POST
+                                // Step 3: Clean the DTO for POST and Create dummy account assignment
                                 PurchaseOrderDTO cleanedPO = PurchaseOrderPostPrepare
                                                 .preparePurchaseOrderBody(originalPO);
 
