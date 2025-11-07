@@ -1,19 +1,22 @@
 _schema-version: 3.3.0
 ID: btpjapanprojectdemo
-description: A simple CAP project.
 version: 1.0.0-SNAPSHOT
+description: A simple CAP project.
+parameters:
+  enable-parallel-deployments: true
+  deploy_mode: html5-repo
 modules:
 - name: btpjapanprojectdemo-srv
   type: java
   path: srv
   properties:
-    JBP_CONFIG_COMPONENTS: 'jres: [''com.sap.xs.java.buildpack.jre.SAPMachineJRE'']'
+    JBP_CONFIG_COMPONENTS: "jres: ['com.sap.xs.java.buildpack.jre.SAPMachineJRE']"
     JBP_CONFIG_SAP_MACHINE_JRE: '{ version: 21.+ }'
     SPRING_PROFILES_ACTIVE: cloud,sandbox
   requires:
-  - name: btpjapanprojectdemo-auth
   - name: btpjapanprojectdemo-db
   - name: btpjapanprojectdemo-destination
+  - name: btpjapanprojectdemo-uaa
   provides:
   - name: srv-api
     properties:
@@ -47,9 +50,9 @@ modules:
       forwardAuthToken: true
       name: srv-api
       url: ~{srv-url}
-  - name: btpjapanprojectdemo-auth
   - name: btpjapanprojectdemo-destination
   - name: btpjapanprojectdemo-html5-runtime
+  - name: btpjapanprojectdemo-uaa
   provides:
   - name: app-api
     properties:
@@ -64,43 +67,28 @@ modules:
   type: com.sap.application.content
   path: .
   requires:
-  - name: btpjapanprojectdemo-auth
-  - name: srv-api
   - name: btpjapanprojectdemo-html5-repo-host
     parameters:
-      config:
-        HTML5Runtime_enabled: true
       content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - name: btpjapanprojectdemosubcontractporeport
+      artifacts:
+      - subcontractporeport.zip
+      target-path: resources
   parameters:
     config:
       HTML5Runtime_enabled: true
       init_data:
         instance:
+          existing_destinations_policy: update
           destinations:
-          - Authentication: NoAuthentication
-            HTML5.DynamicDestination: true
-            HTML5.ForwardAuthToken: true
-            Name: srv-api
-            ProxyType: Internet
-            Type: HTTP
-            URL: ~{srv-api/srv-url}
           - Authentication: NoAuthentication
             Name: ui5
             ProxyType: Internet
             Type: HTTP
             URL: https://ui5.sap.com
-          existing_destinations_policy: update
-  build-parameters:
-    build-result: resources
-    requires:
-    - artifacts:
-      - subcontractporeport.zip
-      name: btpjapanprojectdemosubcontractporeport
-      target-path: resources
-    - artifacts:
-      - subcontractporeport.zip
-      name: subcontractporeport
-      target-path: resources/
 - name: btpjapanprojectdemosubcontractporeport
   type: html5
   path: app/subcontractporeport
@@ -114,10 +102,10 @@ modules:
 - name: btpjapanprojectdemo-destinations
   type: com.sap.application.content
   requires:
-  - name: btpjapanprojectdemo-auth
+  - name: btpjapanprojectdemo-uaa
     parameters:
       service-key:
-        name: btpjapanprojectdemo-auth-key
+        name: btpjapanprojectdemo-uaa-key
   - name: btpjapanprojectdemo-html5-repo-host
     parameters:
       service-key:
@@ -135,38 +123,16 @@ modules:
           ServiceKeyName: btpjapanprojectdemo-html5-repo-host-key
           sap.cloud.service: btpjapanprojectdemo.service
         - Authentication: OAuth2UserTokenExchange
-          Name: btpjapanprojectdemo-auth
-          ServiceInstanceName: btpjapanprojectdemo-auth
-          ServiceKeyName: btpjapanprojectdemo-auth-key
+          Name: btpjapanprojectdemo-uaa
+          ServiceInstanceName: btpjapanprojectdemo-uaa
+          ServiceKeyName: btpjapanprojectdemo-uaa-key
           sap.cloud.service: btpjapanprojectdemo.service
         existing_destinations_policy: update
   build-parameters:
     no-source: true
-- name: subcontractporeport
-  type: html5
-  path: app/subcontractporeport
-  build-parameters:
-    build-result: dist
-    builder: custom
-    commands:
-    - npm install
-    - npm run build:cf
-    supported-platforms: []
+
+
 resources:
-- name: btpjapanprojectdemo-auth
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      oauth2-configuration:
-        redirect-uris:
-        - https://*~{app-api/app-uri}/**
-      tenant-mode: dedicated
-      xsappname: btpjapanprojectdemo-${org}-${space}
-    path: ./xs-security.json
-    service: xsuaa
-    service-plan: application
-  requires:
-  - name: app-api
 - name: btpjapanprojectdemo-db
   type: com.sap.xs.hdi-container
   parameters:
@@ -187,11 +153,6 @@ resources:
             ProxyType: Internet
             Type: HTTP
             URL: ~{srv-api/srv-url}
-          - Authentication: NoAuthentication
-            Name: ui5
-            ProxyType: Internet
-            Type: HTTP
-            URL: https://ui5.sap.com
           existing_destinations_policy: update
     service: destination
     service-plan: lite
@@ -212,6 +173,18 @@ resources:
   parameters:
     service: html5-apps-repo
     service-plan: app-runtime
-parameters:
-  deploy_mode: html5-repo
-  enable-parallel-deployments: true
+- name: btpjapanprojectdemo-uaa
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      oauth2-configuration:
+        redirect-uris:
+        - https://*~{app-api/app-uri}/**
+        - http://localhost:5000/login/callback
+      tenant-mode: dedicated
+      xsappname: btpjapanprojectdemo
+    path: ./xs-security.json
+    service: xsuaa
+    service-plan: application
+  requires:
+  - name: app-api

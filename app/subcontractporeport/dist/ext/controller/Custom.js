@@ -1,0 +1,2 @@
+sap.ui.define(["sap/m/MessageToast","sap/m/MessageBox"],function(t,e){"use strict";return{startReplicateSubcontractPo:async function(){t.show("Starting replication...");try{await this.getEditFlow().invokeAction("startReplicatingPO",{model:this.getModel()});t.show("Success")}catch(e){t.show("Failed: "+(e.message||"Unknown error"))}}}});
+//# sourceMappingURL=Custom.js.map
