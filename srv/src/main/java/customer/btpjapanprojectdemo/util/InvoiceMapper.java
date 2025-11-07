@@ -15,6 +15,7 @@ import customer.btpjapanprojectdemo.model.InvoicePostRequestDTO.SuplrInvcItemPur
 import customer.btpjapanprojectdemo.model.InvoicePostRequestDTO.SupplierInvoiceItmAcctAssgmtResultPost;
 import customer.btpjapanprojectdemo.model.InvoicePostRequestDTO.ToSuplrInvcItemPurOrdRef;
 import customer.btpjapanprojectdemo.model.InvoicePostRequestDTO.ToSupplierInvoiceItmAcctAssgmt;
+import customer.btpjapanprojectdemo.model.MaterialDocumentItemKeyDTO;
 
 public class InvoiceMapper {
     public static SupplierInvoice invoiceGetResponseDTOtoSupplierInvoice(
@@ -38,7 +39,10 @@ public class InvoiceMapper {
         return supplierInvoice;
     }
 
-    public static InvoicePostRequestDTO getResponseToPostRequest(InvoiceGetResponseDTO invoiceGetResponseDTO, HashMap<String,String> poRepToOriList) {
+    public static InvoicePostRequestDTO getResponseToPostRequest(
+            InvoiceGetResponseDTO invoiceGetResponseDTO,
+            HashMap<String, String> poRepToOriList,
+            HashMap<String, HashMap<String, MaterialDocumentItemKeyDTO>> matdocMap) {
         InvoicePostRequestDTO invoicePostRequestDTO = new InvoicePostRequestDTO();
 
         invoicePostRequestDTO.setCompanyCode(invoiceGetResponseDTO.getCompanyCode());
@@ -155,7 +159,8 @@ public class InvoiceMapper {
 
         // Set to_SuplrInvcItemPurOrdRef
 
-        ArrayList<SuplrInvcItemPurOrdRefResultPost> poRefList = responsePORefToRequestPORef(invoiceGetResponseDTO, poRepToOriList);
+        ArrayList<SuplrInvcItemPurOrdRefResultPost> poRefList = responsePORefToRequestPORef(invoiceGetResponseDTO,
+                poRepToOriList, matdocMap);
 
         ToSuplrInvcItemPurOrdRef invoicePORef = invoicePostRequestDTO.new ToSuplrInvcItemPurOrdRef();
         invoicePORef.setResults(poRefList);
@@ -165,19 +170,29 @@ public class InvoiceMapper {
         return invoicePostRequestDTO;
     }
 
-    public static ArrayList<SuplrInvcItemPurOrdRefResultPost> responsePORefToRequestPORef(InvoiceGetResponseDTO invoiceGetResponseDTO, HashMap<String,String> poRepToOriList) {
+    public static ArrayList<SuplrInvcItemPurOrdRefResultPost> responsePORefToRequestPORef(
+            InvoiceGetResponseDTO invoiceGetResponseDTO, 
+            HashMap<String, String> poRepToOriList,
+            HashMap<String, HashMap<String, MaterialDocumentItemKeyDTO>> matdocMap) {
         ArrayList<SuplrInvcItemPurOrdRefResultPost> poRefList = new ArrayList<>();
 
         invoiceGetResponseDTO.getTo_SuplrInvcItemPurOrdRef().getResults().forEach(poRefResponse -> {
             SuplrInvcItemPurOrdRefResultPost poRefRequest = new SuplrInvcItemPurOrdRefResultPost();
 
             poRefRequest.setSupplierInvoiceItem(poRefResponse.getSupplierInvoiceItem());
-            poRefRequest.setPurchaseOrder(poRepToOriList.get(poRefResponse.getPurchaseOrder()));
+
+            // map PO repli to PO ori
+            String oriPO = poRepToOriList.get(poRefResponse.getPurchaseOrder());
+            poRefRequest.setPurchaseOrder(oriPO);
             poRefRequest.setPurchaseOrderItem(poRefResponse.getPurchaseOrderItem());
             poRefRequest.setPlant(poRefResponse.getPlant());
-            poRefRequest.setReferenceDocument(poRefResponse.getReferenceDocument());
-            poRefRequest.setReferenceDocumentFiscalYear(poRefResponse.getReferenceDocumentFiscalYear());
-            poRefRequest.setReferenceDocumentItem(poRefResponse.getReferenceDocumentItem());
+
+            // map Matdoc Repli to Matdoc Ori
+            MaterialDocumentItemKeyDTO matdoc = matdocMap.get(oriPO).get(poRefResponse.getPurchaseOrderItem());
+            poRefRequest.setReferenceDocument(matdoc.getMaterialDocument());
+            poRefRequest.setReferenceDocumentFiscalYear(matdoc.getMaterialDocumentYear());
+            poRefRequest.setReferenceDocumentItem(matdoc.getMaterialDocumentItem());
+
             poRefRequest.setIsSubsequentDebitCredit(poRefResponse.getIsSubsequentDebitCredit());
             poRefRequest.setTaxCode(poRefResponse.getTaxCode());
             poRefRequest.setTaxJurisdiction(poRefResponse.getTaxJurisdiction());
@@ -215,8 +230,8 @@ public class InvoiceMapper {
             poRefRequest.setNl_ChainLiabilityDuration(poRefResponse.getNL_ChainLiabilityDuration());
             poRefRequest.setNl_ChainLiabilityPercent(poRefResponse.getNL_ChainLiabilityPercent());
 
-            ArrayList<SupplierInvoiceItmAcctAssgmtResultPost> actAssgList = responseActAssgTorequestActAssg(poRefResponse);
-
+            ArrayList<SupplierInvoiceItmAcctAssgmtResultPost> actAssgList = responseActAssgTorequestActAssg(
+                    poRefResponse);
 
             ToSupplierInvoiceItmAcctAssgmt toSupplierInvoiceItmAcctAssgmt = new ToSupplierInvoiceItmAcctAssgmt();
             toSupplierInvoiceItmAcctAssgmt.setResults(actAssgList);
@@ -229,58 +244,59 @@ public class InvoiceMapper {
         return poRefList;
     }
 
-    public static ArrayList<SupplierInvoiceItmAcctAssgmtResultPost> responseActAssgTorequestActAssg(SuplrInvcItemPurOrdRefResultGet poRefResponse) {
+    public static ArrayList<SupplierInvoiceItmAcctAssgmtResultPost> responseActAssgTorequestActAssg(
+            SuplrInvcItemPurOrdRefResultGet poRefResponse) {
         ArrayList<SupplierInvoiceItmAcctAssgmtResultPost> actAssgList = new ArrayList<>();
 
-        poRefResponse.getTo_SupplierInvoiceItmAcctAssgmt().getResults().forEach(actAssgResponse -> {
-                SupplierInvoiceItmAcctAssgmtResultPost actAssgRequest = new SupplierInvoiceItmAcctAssgmtResultPost();
+        // poRefResponse.getTo_SupplierInvoiceItmAcctAssgmt().getResults().forEach(actAssgResponse -> {
+        //     SupplierInvoiceItmAcctAssgmtResultPost actAssgRequest = new SupplierInvoiceItmAcctAssgmtResultPost();
 
-                actAssgRequest.setSupplierInvoiceItem(actAssgResponse.getSupplierInvoiceItem());
-                actAssgRequest.setOrdinalNumber(actAssgResponse.getOrdinalNumber());
-                actAssgRequest.setCostCenter(actAssgResponse.getCostCenter());
-                actAssgRequest.setControllingArea(actAssgResponse.getControllingArea());
-                actAssgRequest.setBusinessArea(actAssgResponse.getBusinessArea());
-                actAssgRequest.setProfitCenter(actAssgResponse.getProfitCenter());
-                actAssgRequest.setFunctionalArea(actAssgResponse.getFunctionalArea());
-                actAssgRequest.setGlAccount(actAssgResponse.getGlAccount());
-                actAssgRequest.setSalesOrder(actAssgResponse.getSalesOrder());
-                actAssgRequest.setSalesOrderItem(actAssgResponse.getSalesOrderItem());
-                actAssgRequest.setCostObject(actAssgResponse.getCostObject());
-                actAssgRequest.setWbSElement(actAssgResponse.getWbSElement());
-                actAssgRequest.setDocumentCurrency(actAssgResponse.getDocumentCurrency());
-                actAssgRequest.setSuplrInvcAcctAssignmentAmount(actAssgResponse.getSuplrInvcAcctAssignmentAmount());
-                actAssgRequest.setPurchaseOrderQuantityUnit(actAssgResponse.getPurchaseOrderQuantityUnit());
-                actAssgRequest.setPurchaseOrderQtyUnitSAPCode(actAssgResponse.getPurchaseOrderQtyUnitSAPCode());
-                actAssgRequest.setPurchaseOrderQtyUnitISOCode(actAssgResponse.getPurchaseOrderQtyUnitISOCode());
-                actAssgRequest.setQuantity(actAssgResponse.getQuantity());
-                actAssgRequest.setTaxCode(actAssgResponse.getTaxCode());
-                actAssgRequest.setAccountAssignmentNumber(actAssgResponse.getAccountAssignmentNumber());
-                actAssgRequest.setAccountAssignmentIsUnplanned(actAssgResponse.isAccountAssignmentIsUnplanned());
-                actAssgRequest.setPersonnelNumber(actAssgResponse.getPersonnelNumber());
-                actAssgRequest.setMasterFixedAsset(actAssgResponse.getMasterFixedAsset());
-                actAssgRequest.setFixedAsset(actAssgResponse.getFixedAsset());
-                actAssgRequest.setTaxJurisdiction(actAssgResponse.getTaxJurisdiction());
-                actAssgRequest.setInternalOrder(actAssgResponse.getInternalOrder());
-                actAssgRequest.setProjectNetworkInternalID(actAssgResponse.getProjectNetworkInternalID());
-                actAssgRequest.setNetworkActivityInternalID(actAssgResponse.getNetworkActivityInternalID());
-                actAssgRequest.setProjectNetwork(actAssgResponse.getProjectNetwork());
-                actAssgRequest.setNetworkActivity(actAssgResponse.getNetworkActivity());
-                actAssgRequest.setCommitmentItem(actAssgResponse.getCommitmentItem());
-                actAssgRequest.setFundsCenter(actAssgResponse.getFundsCenter());
-                actAssgRequest.setFund(actAssgResponse.getFund());
-                actAssgRequest.setGrantID(actAssgResponse.getGrantID());
-                actAssgRequest.setSuplrInvcAccountAssignmentText(actAssgResponse.getSuplrInvcAccountAssignmentText());
-                actAssgRequest.setPurchaseOrderPriceUnit(actAssgResponse.getPurchaseOrderPriceUnit());
-                actAssgRequest.setPurchaseOrderPriceUnitSAPCode(actAssgResponse.getPurchaseOrderPriceUnitSAPCode());
-                actAssgRequest.setPurchaseOrderPriceUnitISOCode(actAssgResponse.getPurchaseOrderPriceUnitISOCode());
-                actAssgRequest.setQuantityInPurchaseOrderUnit(actAssgResponse.getQuantityInPurchaseOrderUnit());
-                actAssgRequest.setProfitabilitySegment(actAssgResponse.getProfitabilitySegment());
-                actAssgRequest.setBudgetPeriod(actAssgResponse.getBudgetPeriod());
-                actAssgRequest.setTaxCountry(actAssgResponse.getTaxCountry());
+        //     actAssgRequest.setSupplierInvoiceItem(actAssgResponse.getSupplierInvoiceItem());
+        //     actAssgRequest.setOrdinalNumber(actAssgResponse.getOrdinalNumber());
+        //     actAssgRequest.setCostCenter(actAssgResponse.getCostCenter());
+        //     actAssgRequest.setControllingArea(actAssgResponse.getControllingArea());
+        //     actAssgRequest.setBusinessArea(actAssgResponse.getBusinessArea());
+        //     actAssgRequest.setProfitCenter(actAssgResponse.getProfitCenter());
+        //     actAssgRequest.setFunctionalArea(actAssgResponse.getFunctionalArea());
+        //     actAssgRequest.setGlAccount(actAssgResponse.getGlAccount());
+        //     actAssgRequest.setSalesOrder(actAssgResponse.getSalesOrder());
+        //     actAssgRequest.setSalesOrderItem(actAssgResponse.getSalesOrderItem());
+        //     actAssgRequest.setCostObject(actAssgResponse.getCostObject());
+        //     actAssgRequest.setWbSElement(actAssgResponse.getWbSElement());
+        //     actAssgRequest.setDocumentCurrency(actAssgResponse.getDocumentCurrency());
+        //     actAssgRequest.setSuplrInvcAcctAssignmentAmount(actAssgResponse.getSuplrInvcAcctAssignmentAmount());
+        //     actAssgRequest.setPurchaseOrderQuantityUnit(actAssgResponse.getPurchaseOrderQuantityUnit());
+        //     actAssgRequest.setPurchaseOrderQtyUnitSAPCode(actAssgResponse.getPurchaseOrderQtyUnitSAPCode());
+        //     actAssgRequest.setPurchaseOrderQtyUnitISOCode(actAssgResponse.getPurchaseOrderQtyUnitISOCode());
+        //     actAssgRequest.setQuantity(actAssgResponse.getQuantity());
+        //     actAssgRequest.setTaxCode(actAssgResponse.getTaxCode());
+        //     actAssgRequest.setAccountAssignmentNumber(actAssgResponse.getAccountAssignmentNumber());
+        //     actAssgRequest.setAccountAssignmentIsUnplanned(actAssgResponse.isAccountAssignmentIsUnplanned());
+        //     actAssgRequest.setPersonnelNumber(actAssgResponse.getPersonnelNumber());
+        //     actAssgRequest.setMasterFixedAsset(actAssgResponse.getMasterFixedAsset());
+        //     actAssgRequest.setFixedAsset(actAssgResponse.getFixedAsset());
+        //     actAssgRequest.setTaxJurisdiction(actAssgResponse.getTaxJurisdiction());
+        //     actAssgRequest.setInternalOrder(actAssgResponse.getInternalOrder());
+        //     actAssgRequest.setProjectNetworkInternalID(actAssgResponse.getProjectNetworkInternalID());
+        //     actAssgRequest.setNetworkActivityInternalID(actAssgResponse.getNetworkActivityInternalID());
+        //     actAssgRequest.setProjectNetwork(actAssgResponse.getProjectNetwork());
+        //     actAssgRequest.setNetworkActivity(actAssgResponse.getNetworkActivity());
+        //     actAssgRequest.setCommitmentItem(actAssgResponse.getCommitmentItem());
+        //     actAssgRequest.setFundsCenter(actAssgResponse.getFundsCenter());
+        //     actAssgRequest.setFund(actAssgResponse.getFund());
+        //     actAssgRequest.setGrantID(actAssgResponse.getGrantID());
+        //     actAssgRequest.setSuplrInvcAccountAssignmentText(actAssgResponse.getSuplrInvcAccountAssignmentText());
+        //     actAssgRequest.setPurchaseOrderPriceUnit(actAssgResponse.getPurchaseOrderPriceUnit());
+        //     actAssgRequest.setPurchaseOrderPriceUnitSAPCode(actAssgResponse.getPurchaseOrderPriceUnitSAPCode());
+        //     actAssgRequest.setPurchaseOrderPriceUnitISOCode(actAssgResponse.getPurchaseOrderPriceUnitISOCode());
+        //     actAssgRequest.setQuantityInPurchaseOrderUnit(actAssgResponse.getQuantityInPurchaseOrderUnit());
+        //     actAssgRequest.setProfitabilitySegment(actAssgResponse.getProfitabilitySegment());
+        //     actAssgRequest.setBudgetPeriod(actAssgResponse.getBudgetPeriod());
+        //     actAssgRequest.setTaxCountry(actAssgResponse.getTaxCountry());
 
-                actAssgList.add(actAssgRequest);
+        //     actAssgList.add(actAssgRequest);
 
-            });
+        // });
         return actAssgList;
     }
 

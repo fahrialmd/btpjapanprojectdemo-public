@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ import cds.gen.mainservice.SupplierInvoiceReplicateInvoicesContext;
 import customer.btpjapanprojectdemo.exception.BusinessException;
 import customer.btpjapanprojectdemo.model.InvoiceGetResponseDTO;
 import customer.btpjapanprojectdemo.model.InvoicePostRequestDTO;
+import customer.btpjapanprojectdemo.model.MaterialDocumentItemKeyDTO;
 import customer.btpjapanprojectdemo.service.SupplierInvoiceReplicationService;
 import customer.btpjapanprojectdemo.service.impl.SAPCloudODataClient.SAPCommUser;
 import customer.btpjapanprojectdemo.util.InvoiceMapper;
@@ -39,7 +42,8 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
     private final GenericCqnService genericCqnService;
     private final SAPCloudODataClient sapCloudODataClient;
     private final ObjectMapper objectMapper;
-    private HashMap<String, InvoiceGetResponseDTO> getResponseList;
+    private HashMap<String, InvoiceGetResponseDTO> getResponseMap; // key : Invoice No
+    private HashMap<String, HashMap<String, MaterialDocumentItemKeyDTO>> matdocMap; // key : PO num, PO item
     private HashMap<String,String> poRepToOriList;
 
     public SupplierInvoiceReplicationServiceImpl(
@@ -49,7 +53,8 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
         this.objectMapper = new ObjectMapper();
         this.objectMapper.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, false);
         this.sapCloudODataClient = sapCloudODataClient;
-        this.getResponseList = new HashMap<>();
+        this.getResponseMap = new HashMap<>();
+        this.matdocMap = new HashMap<>();
         this.poRepToOriList = new HashMap<>();
     }
 
@@ -69,11 +74,13 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
 
         List<POMapping> poMappingList = genericCqnService.getPoMappings(loggedPOList);
 
-        Set<String> repliPOList = new HashSet<>();
+        // Create Set of Repli PO
+        // create Map of PO repli to PO ori 
+        Set<String> repliPOSet = new HashSet<>();
         for (int i = 0; i < poMappingList.size(); i++) {
             POMapping poMapping = poMappingList.get(i);
 
-            repliPOList.add(poMapping.getReplicaPo());
+            repliPOSet.add(poMapping.getReplicaPo());
             poRepToOriList.put(poMapping.getReplicaPo(), poMapping.getOriginalPo());
         }
 
@@ -108,15 +115,66 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
 
                 // if standardPO is in the List of PO that has no Subcontracting Invoice
                 // then save Invoice
-                if (repliPOList.contains(standardPO)) {
+                if (repliPOSet.contains(standardPO)) {
                     SupplierInvoice supplierInvoice = InvoiceMapper
                             .invoiceGetResponseDTOtoSupplierInvoice(invoiceObject);
-                    getResponseList.put(invoiceObject.getSupplierInvoice(), invoiceObject);
+                    getResponseMap.put(invoiceObject.getSupplierInvoice(), invoiceObject);
                     supplierInvoices.add(supplierInvoice);
                 }
 
             });
         }
+
+        // Create Set of Ori PO
+        Set<String> oriPOSet = new HashSet<>();
+        for (InvoiceGetResponseDTO invoice : getResponseMap.values()) {
+            String repliPO = invoice.getTo_SuplrInvcItemPurOrdRef().getResults().getFirst()
+                        .getPurchaseOrder();
+            String oriPO = poRepToOriList.get(repliPO);
+
+            oriPOSet.add(oriPO);
+        }
+
+        // Combine Ori Set into a single string for filter
+        String poFilter = oriPOSet.stream()
+            .map(po -> String.format("(PurchaseOrder eq '%s' )",po))
+            .collect(Collectors.joining(" or "));
+
+        // Fetch all matdoc data
+        String readMatdocUrl = UriComponentsBuilder.newInstance()
+                .scheme("https")
+                .host("my200132.s4hana.sapcloud.cn")
+                .path("/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV/A_MaterialDocumentItem")
+                .queryParam("$filter",
+                        poFilter)
+                .build().toUriString();
+
+        JsonNode matdocNode = sapCloudODataClient.executeRequest(
+                HttpMethod.GET,
+                readMatdocUrl,
+                null,
+                SAPCommUser.GOODS_MOVEMENT);
+        
+        if (matdocNode.isArray()) {
+            matdocNode.forEach(matdocJson -> {
+
+                // parse response to MaterialDocumentItemKeyDTO and save it
+                MaterialDocumentItemKeyDTO matdocObject = objectMapper.convertValue(matdocJson,
+                        MaterialDocumentItemKeyDTO.class);
+
+                if (this.matdocMap.containsKey(matdocObject.getPurchaseOrder())) {
+                    if (!this.matdocMap.get(matdocObject.getPurchaseOrder()).containsKey(matdocObject.getPurchaseOrderItem())) {
+                        this.matdocMap.get(matdocObject.getPurchaseOrder()).put(matdocObject.getPurchaseOrderItem(), matdocObject);
+                        
+                    }
+                } else {
+                    HashMap<String, MaterialDocumentItemKeyDTO> matdocInnerMap = new HashMap<>();
+                    matdocInnerMap.put(matdocObject.getPurchaseOrderItem(), matdocObject);
+                    this.matdocMap.put(matdocObject.getPurchaseOrder(), matdocInnerMap);
+                }
+            });
+        }
+
 
         return supplierInvoices;
     }
@@ -129,9 +187,9 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
         String supplierInvoiceNo = (String) analysisResult.targetKeys().get(SupplierInvoice.INVOICE_NO);
 
         // map invoice response to request
-        InvoiceGetResponseDTO invoiceGetResponseDTO = getResponseList.get(supplierInvoiceNo);
+        InvoiceGetResponseDTO invoiceGetResponseDTO = getResponseMap.get(supplierInvoiceNo);
 
-        InvoicePostRequestDTO invoicePostRequestDTO = InvoiceMapper.getResponseToPostRequest(invoiceGetResponseDTO, poRepToOriList);
+        InvoicePostRequestDTO invoicePostRequestDTO = InvoiceMapper.getResponseToPostRequest(invoiceGetResponseDTO, poRepToOriList, matdocMap);
 
         String jsonRequest = "";
         try {
