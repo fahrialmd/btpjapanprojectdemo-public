@@ -71,7 +71,7 @@ public class GenericCqnService {
      * @return list of POMapping
      */
     public List<POMapping> getPoMappings(List<String> excludeList) {
-        CqnSelect select = Select.from(POMapping_.CDS_NAME).where(w -> w.get(POMapping.ORIGINAL_PO).ne(w.get(POMapping.ORIGINAL_PO).in(excludeList)));
+        CqnSelect select = Select.from(POMapping_.CDS_NAME).where(w -> w.get(POMapping.ORIGINAL_PO).in(excludeList).not());
 
         List<POMapping> poMappingList = entityService.selectList(mainService, select, POMapping.class);
 

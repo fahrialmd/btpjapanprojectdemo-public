@@ -241,7 +241,7 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
         invoiceLog.setPostingPeriodOriginal(String.valueOf(postingDateOri.getMonthValue()));
 
         invoiceLog.setPOOriginal(
-                invoiceGetResponseDTO.getTo_SuplrInvcItemPurOrdRef().getResults().getFirst().getPurchaseOrder());
+                invoicePostRequestDTO.getTo_SuplrInvcItemPurOrdRef().getResults().getFirst().getPurchaseOrder());
 
         invoiceLog.setTimestamp(Instant.now());
 

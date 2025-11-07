@@ -50,11 +50,13 @@ annotate service.SupplierInvoice with @(
             $Type : 'UI.DataFieldForAction',
             Action : 'MainService.showCurrentMonth',
             Label : 'showCurrentMonth',
+            @UI.Hidden,
         },
         {
             $Type : 'UI.DataFieldForAction',
             Action : 'MainService.showPreviousMonth',
             Label : 'showPreviousMonth',
+            @UI.Hidden,
         },
     ]
 );
