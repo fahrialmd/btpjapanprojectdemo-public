@@ -92,6 +92,7 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                         "PurchaseOrderItemCategory eq '3' and not (%s)",
                                         mappedPoConditions);
                 }
+                // completeFilter = "PurchaseOrder eq '4500000048' and " + completeFilter;
                 // Creating API URI
                 String allPoNumbersUrl = UriComponentsBuilder.newInstance()
                                 .scheme("https")

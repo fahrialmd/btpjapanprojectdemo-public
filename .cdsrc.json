@@ -6,6 +6,12 @@
     "db": "hana",
     "[hybrid]": {
       "auth": "xsuaa"
-    }
+    },
+    "destinations": true,
+    "html5-runtime": true,
+    "[production]": {
+      "auth": "xsuaa"
+    },
+    "html5-repo": true
   }
 }

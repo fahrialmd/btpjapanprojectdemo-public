@@ -2,7 +2,7 @@
   "scopes": [],
   "attributes": [],
   "role-templates": [],
-  "xsappname": "btpjapanprojectdemo-hybrid",
+  "xsappname": "btpjapanprojectdemo",
   "tenant-mode": "dedicated",
   "authorities-inheritance": false,
   "oauth2-configuration": {
