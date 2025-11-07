@@ -27,14 +27,14 @@ public class SAPCloudODataClient {
 
     // SAP Communication Users
     private static final String PURCHASE_ORDER_USER_AUTH = "Basic U1VCUE9fNDc4MjU6JmhTa0Bbdm82LWsyU0R2Vm5ZW2RaLTVmVldNKXJ4UyhkXGtrRkt0Uw==";
-    private static final String GOODS_MOVEMENT_USER_AUTH = "";
-    private static final String INVOICE_REGISTRATION_USER_AUTH = "";
+    private static final String GOODS_MOVEMENT_USER_AUTH = "Basic R09PRFNSRUNFSVBUXzQ3ODE4OktZaDZKVDg+V11vNyh4OUxcJDxaXXp2JXMve2hcLTVva0ppRz4lQ1k=";
+    private static final String INVOICE_REGISTRATION_USER_AUTH = "Basic SU5WT0lDRVVTRVJfNDkyMjM6WGRxU25UUGp0a0p7cktTUFIyNks8NiM3enBLNiNMUWcrQVZlZSNiVQ==";
     private static final String ACCOUNTING_CLEARING_USER_AUTH = "";
 
     // Basic URL for CSRF
-    private static final String PURCHASE_ORDER_USER_URL = "https://my200132.s4hana.sapcloud.cn/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrder";
-    private static final String GOODS_MOVEMENT_USER_URL = "";
-    private static final String INVOICE_REGISTRATION_USER_URL = "";
+    private static final String PURCHASE_ORDER_USER_URL = "https://my200132.s4hana.sapcloud.cn/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/A_PurchaseOrder?$top=0";
+    private static final String GOODS_MOVEMENT_USER_URL = "https://my200132-api.s4hana.sapcloud.cn/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV/A_MaterialDocumentHeader?$top=0";
+    private static final String INVOICE_REGISTRATION_USER_URL = "https://my200132.s4hana.sapcloud.cn/sap/opu/odata/sap/API_SUPPLIERINVOICE_PROCESS_SRV/A_SupplierInvoice?$top=0";
     private static final String ACCOUNTING_CLEARING_USER_URL = "";
 
     // User session CSRF token

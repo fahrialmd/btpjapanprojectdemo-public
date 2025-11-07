@@ -1,2 +1,1 @@
-ID,invoice_log,PO,posting_period,createdAt,createdBy,modifiedAt,modifiedBy
-10140010-a73c-47b4-997a-9ddb7dc44e3c,invoice_log-10140010,PO-10140010,posting_period-10140010,2000-08-13T17:00:00.000Z,createdBy.61c2y@example.org,2000-08-24T17:00:00.000Z,modifiedBy.61c2y@example.com
+ID,invoice_replicated,year_replicated,posting_period_replicated,PO_replicated,invoice_original,year_original,posting_period_original,PO_original,timestamp,createdAt,createdBy,modifiedAt,modifiedBy
