@@ -58,6 +58,7 @@ annotate service.SupplierInvoice with @(
             Label : 'showPreviousMonth',
             @UI.Hidden,
         },
-    ]
+    ],
+    UI.DeleteHidden : true,
 );
 
