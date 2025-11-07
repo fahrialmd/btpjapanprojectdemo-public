@@ -8,10 +8,12 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -91,8 +93,15 @@ public class SAPCloudODataClient {
 
             return parseResponse(response);
 
+        } catch (HttpClientErrorException e) {
+            // Check if it's a CSRF token issue
+            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                fetchCsrfToken(baseUrl, user);
+                return executeRequest(method, baseUrl, requestBody, user);
+            }
+            throw new BusinessException(parseErrorResponse(e.getResponseBodyAsString()));
         } catch (Exception e) {
-            throw new BusinessException("OData API call failed " + e.getMessage());
+            throw new BusinessException("Error: " + e.getMessage());
         }
     }
 
@@ -145,6 +154,9 @@ public class SAPCloudODataClient {
         return headers;
     }
 
+    /*
+     * Update session's CSRF and Token
+     */
     private void updateSessionState(ResponseEntity<String> response, SAPCommUser user) {
         String newCsrfToken = response.getHeaders().getFirst("x-csrf-token");
         if (newCsrfToken != null && !newCsrfToken.isEmpty()) {
@@ -161,6 +173,9 @@ public class SAPCloudODataClient {
         }
     }
 
+    /*
+     * API response parsing method
+     */
     private JsonNode parseResponse(ResponseEntity<String> response) throws Exception {
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new BusinessException("API returned status: " + response.getStatusCode());
@@ -180,6 +195,18 @@ public class SAPCloudODataClient {
         // If the result is a collection, odata will put it into an array called
         // "results"
         return data.has("results") ? data.get("results") : data;
+    }
+
+    /*
+     * API error response parsing method
+     */
+    public String parseErrorResponse(String exceptionMessage) {
+        try {
+            JsonNode errorResponse = objectMapper.readTree(exceptionMessage);
+            return errorResponse.path("error").path("message").path("value").asText();
+        } catch (Exception e) {
+            throw new BusinessException(e.getMessage());
+        }
     }
 
     // Helper methods for user-specific session management

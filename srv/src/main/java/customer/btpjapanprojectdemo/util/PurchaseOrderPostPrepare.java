@@ -1,8 +1,14 @@
 package customer.btpjapanprojectdemo.util;
 
-import customer.btpjapanprojectdemo.model.*;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import customer.btpjapanprojectdemo.model.AccountAssignmentDTO;
+import customer.btpjapanprojectdemo.model.PurchaseOrderDTO;
+import customer.btpjapanprojectdemo.model.PurchaseOrderItemDTO;
+import customer.btpjapanprojectdemo.model.PurchaseOrderItemNoteDTO;
+import customer.btpjapanprojectdemo.model.PurchaseOrderNoteDTO;
+import customer.btpjapanprojectdemo.model.ScheduleLineDTO;
 
 public class PurchaseOrderPostPrepare {
 
@@ -14,6 +20,7 @@ public class PurchaseOrderPostPrepare {
 
                 PurchaseOrderDTO cleaned = source.toBuilder()
                                 .build();
+                // cleaned.setCompanyCode("13101301013010");
                 cleaned.setPurchaseOrder("");
                 cleaned.setPurchasingProcessingStatus(null);
                 cleaned.setCreatedByUser(null);

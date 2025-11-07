@@ -266,7 +266,7 @@ public class PurchaseOrderReplicationServiceImpl implements PurchaseOrderReplica
                                 }
 
                         } catch (Exception e) {
-                                throw new BusinessException("Failed to replicate PO " + e);
+                                throw new BusinessException("Failed to replicate PO: " + e.getMessage());
                         }
                 });
 
