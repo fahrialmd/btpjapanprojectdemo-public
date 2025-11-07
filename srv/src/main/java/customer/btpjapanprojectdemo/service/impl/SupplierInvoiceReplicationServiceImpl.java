@@ -29,8 +29,7 @@ import cds.gen.mainservice.POMapping;
 import cds.gen.mainservice.SupplierInvoice;
 import cds.gen.mainservice.SupplierInvoiceReplicateInvoicesContext;
 import customer.btpjapanprojectdemo.exception.BusinessException;
-import customer.btpjapanprojectdemo.model.InvoiceGetResponseDTO;
-import customer.btpjapanprojectdemo.model.InvoicePostRequestDTO;
+import customer.btpjapanprojectdemo.model.InvoiceDTO;
 import customer.btpjapanprojectdemo.model.MaterialDocumentItemKeyDTO;
 import customer.btpjapanprojectdemo.service.SupplierInvoiceReplicationService;
 import customer.btpjapanprojectdemo.service.impl.SAPCloudODataClient.SAPCommUser;
@@ -42,7 +41,7 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
     private final GenericCqnService genericCqnService;
     private final SAPCloudODataClient sapCloudODataClient;
     private final ObjectMapper objectMapper;
-    private HashMap<String, InvoiceGetResponseDTO> getResponseMap; // key : Invoice No
+    private HashMap<String, InvoiceDTO> getResponseMap; // key : Invoice No
     private HashMap<String, HashMap<String, MaterialDocumentItemKeyDTO>> matdocMap; // key : PO num, PO item
     private HashMap<String,String> poRepToOriList;
 
@@ -106,8 +105,8 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
             invoicesNode.forEach(invoiceJson -> {
 
                 // parse response to Invoice Get Response DTO Class
-                InvoiceGetResponseDTO invoiceObject = objectMapper.convertValue(invoiceJson,
-                        InvoiceGetResponseDTO.class);
+                InvoiceDTO invoiceObject = objectMapper.convertValue(invoiceJson,
+                        InvoiceDTO.class);
 
                 // get Standard PO Number
                 String standardPO = invoiceObject.getTo_SuplrInvcItemPurOrdRef().getResults().getFirst()
@@ -127,7 +126,7 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
 
         // Create Set of Ori PO
         Set<String> oriPOSet = new HashSet<>();
-        for (InvoiceGetResponseDTO invoice : getResponseMap.values()) {
+        for (InvoiceDTO invoice : getResponseMap.values()) {
             String repliPO = invoice.getTo_SuplrInvcItemPurOrdRef().getResults().getFirst()
                         .getPurchaseOrder();
             String oriPO = poRepToOriList.get(repliPO);
@@ -187,9 +186,9 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
         String supplierInvoiceNo = (String) analysisResult.targetKeys().get(SupplierInvoice.INVOICE_NO);
 
         // map invoice response to request
-        InvoiceGetResponseDTO invoiceGetResponseDTO = getResponseMap.get(supplierInvoiceNo);
+        InvoiceDTO invoiceGetResponseDTO = getResponseMap.get(supplierInvoiceNo);
 
-        InvoicePostRequestDTO invoicePostRequestDTO = InvoiceMapper.getResponseToPostRequest(invoiceGetResponseDTO, poRepToOriList, matdocMap);
+        InvoiceDTO invoicePostRequestDTO = InvoiceMapper.getResponseToPostRequest(invoiceGetResponseDTO, poRepToOriList, matdocMap);
 
         String jsonRequest = "";
         try {
@@ -221,8 +220,8 @@ public class SupplierInvoiceReplicationServiceImpl implements SupplierInvoiceRep
         context.getMessages().success(successMsg);
     }
 
-    private void logInvoiceReplication(InvoiceGetResponseDTO invoiceGetResponseDTO,
-            InvoicePostRequestDTO invoicePostRequestDTO, String invoiceNo, String fiscalYear) {
+    private void logInvoiceReplication(InvoiceDTO invoiceGetResponseDTO,
+            InvoiceDTO invoicePostRequestDTO, String invoiceNo, String fiscalYear) {
         InvoiceLog invoiceLog = InvoiceLog.create();
 
         invoiceLog.setInvoiceReplicated(invoiceGetResponseDTO.getSupplierInvoice());

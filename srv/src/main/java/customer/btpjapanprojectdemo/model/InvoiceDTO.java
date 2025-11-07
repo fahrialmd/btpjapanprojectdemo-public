@@ -2,23 +2,30 @@ package customer.btpjapanprojectdemo.model;
 
 import java.util.ArrayList;
 
+import org.springframework.web.service.invoker.HttpRequestValues.Metadata;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class InvoiceGetResponseDTO {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class InvoiceDTO {
 
-    public Metadata __metadata;
-
-    @JsonProperty("SupplierInvoice")
+    @JsonProperty(value = "SupplierInvoice", access = Access.WRITE_ONLY)
     public String supplierInvoice;
 
-    @JsonProperty("FiscalYear")
+    @JsonProperty(value = "FiscalYear", access = Access.WRITE_ONLY)
     public String fiscalYear;
 
     @JsonProperty("CompanyCode")
@@ -30,10 +37,10 @@ public class InvoiceGetResponseDTO {
     @JsonProperty("PostingDate")
     public String postingDate;
 
-    @JsonProperty("CreationDate")
+    @JsonProperty(value = "CreationDate", access = Access.WRITE_ONLY)
     public String creationDate;
 
-    @JsonProperty("SuplrInvcLstChgDteTmeTxt")
+    @JsonProperty(value = "SuplrInvcLstChgDteTmeTxt", access = Access.WRITE_ONLY)
     public String suplrInvcLstChgDteTmeTxt;
 
     @JsonProperty("SupplierInvoiceIDByInvcgParty")
@@ -88,7 +95,7 @@ public class InvoiceGetResponseDTO {
     public String accountingDocumentType;
 
     @JsonProperty("BPBankAccountInternalID")
-    public String bPBankAccountInternalID;
+    public String bpBankAccountInternalID;
 
     @JsonProperty("SupplierInvoiceStatus")
     public String supplierInvoiceStatus;
@@ -184,7 +191,7 @@ public class InvoiceGetResponseDTO {
     public String supplierVATRegistration;
 
     @JsonProperty("IsEUTriangularDeal")
-    public boolean isEUTriangularDeal;
+    public boolean euTriangularDeal;
 
     @JsonProperty("SuplrInvcDebitCrdtCodeDelivery")
     public String suplrInvcDebitCrdtCodeDelivery;
@@ -207,32 +214,32 @@ public class InvoiceGetResponseDTO {
     @JsonProperty("AlternativePayeePayer")
     public String alternativePayeePayer;
 
-    @JsonProperty("SupplierInvoiceOrigin")
+    @JsonProperty(value = "SupplierInvoiceOrigin", access = Access.WRITE_ONLY)
     public String supplierInvoiceOrigin;
 
-    @JsonProperty("ReverseDocument")
+    @JsonProperty(value = "ReverseDocument", access = Access.WRITE_ONLY)
     public String reverseDocument;
 
-    @JsonProperty("ReverseDocumentFiscalYear")
+    @JsonProperty(value = "ReverseDocumentFiscalYear", access = Access.WRITE_ONLY)
     public String reverseDocumentFiscalYear;
 
-    @JsonProperty("IsReversal")
-    public boolean isReversal;
+    @JsonProperty(value = "IsReversal", access = Access.WRITE_ONLY)
+    public boolean reversal;
 
-    @JsonProperty("IsReversed")
-    public boolean isReversed;
+    @JsonProperty(value = "IsReversed", access = Access.WRITE_ONLY)
+    public boolean reversed;
 
-    @JsonProperty("SupplierInvoicePaymentStatus")
+    @JsonProperty(value = "SupplierInvoicePaymentStatus", access = Access.WRITE_ONLY)
     public String supplierInvoicePaymentStatus;
 
     @JsonProperty("IN_GSTPartner")
-    public String iN_GSTPartner;
+    public String in_GSTPartner;
 
     @JsonProperty("IN_GSTPlaceOfSupply")
-    public String iN_GSTPlaceOfSupply;
+    public String in_GSTPlaceOfSupply;
 
     @JsonProperty("IN_InvoiceReferenceNumber")
-    public String iN_InvoiceReferenceNumber;
+    public String in_InvoiceReferenceNumber;
 
     @JsonProperty("JrnlEntryCntrySpecificRef1")
     public String jrnlEntryCntrySpecificRef1;
@@ -271,142 +278,46 @@ public class InvoiceGetResponseDTO {
     public String jrnlEntryCntrySpecificBP2;
 
     // Association
-    public ToBRSupplierInvoiceNFDocument to_BR_SupplierInvoiceNFDocument;
-
-    public ToSelectedDeliveryNotes to_SelectedDeliveryNotes;
-
-    public ToSelectedPurchaseOrders to_SelectedPurchaseOrders;
-
-    public ToSelectedServiceEntrySheets to_SelectedServiceEntrySheets;
-
-    public ToSuplrInvcItemAsset to_SuplrInvcItemAsset;
-
-    public ToSuplrInvcItemMaterial to_SuplrInvcItemMaterial;
 
     public ToSuplrInvcItemPurOrdRef to_SuplrInvcItemPurOrdRef;
 
-    public ToSuplrInvoiceAdditionalData to_SuplrInvoiceAdditionalData;
-
-    public ToSupplierInvoiceItemGLAcct to_SupplierInvoiceItemGLAcct;
-
-    public ToSupplierInvoiceODN to_SupplierInvoiceODN;
-
+    @JsonProperty(access = Access.WRITE_ONLY)
     public ToSupplierInvoiceTax to_SupplierInvoiceTax;
 
-    public ToSupplierInvoiceWhldgTax to_SupplierInvoiceWhldgTax;
-
     // Association Class
+
     @Data
+    @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
-    public class ToBRSupplierInvoiceNFDocument {
-        public Deferred __deferred;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ToSuplrInvcItemPurOrdRef {
+        public ArrayList<SuplrInvcItemPurOrdRefResult> results;
     }
 
     @Data
+    @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
-    public class ToSelectedDeliveryNotes {
-        public Deferred __deferred;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ToSupplierInvoiceTax {
+        public ArrayList<SupplierInvoiceTaxResult> results;
     }
 
     @Data
+    @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
-    public class ToSelectedPurchaseOrders {
-        public Deferred __deferred;
-    }
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class SuplrInvcItemPurOrdRefResult {
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class ToSelectedServiceEntrySheets {
-        public Deferred __deferred;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class ToSuplrInvcItemAsset {
-        public Deferred __deferred;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class ToSuplrInvcItemMaterial {
-        public Deferred __deferred;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class ToSuplrInvcItemPurOrdRef {
-        public ArrayList<SuplrInvcItemPurOrdRefResultGet> results;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class ToSuplrInvoiceAdditionalData {
-        public Deferred __deferred;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class ToSupplierInvoiceItemGLAcct {
-        public Deferred __deferred;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class ToSupplierInvoiceODN {
-        public Deferred __deferred;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class ToSupplierInvoiceTax {
-        public ArrayList<SupplierInvoiceTaxResultGet> results;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class ToSupplierInvoiceWhldgTax {
-        public Deferred __deferred;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Deferred {
-        public String uri;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Metadata {
-        public String id;
-        public String uri;
-        public String type;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class SuplrInvcItemPurOrdRefResultGet {
-
-        public Metadata __metadata;
-
-        @JsonProperty("SupplierInvoice")
+        @JsonProperty(value = "SupplierInvoice", access = Access.WRITE_ONLY)
         public String supplierInvoice;
 
-        @JsonProperty("FiscalYear")
+        @JsonProperty(value = "FiscalYear", access = Access.WRITE_ONLY)
         public String fiscalYear;
 
         @JsonProperty("SupplierInvoiceItem")
@@ -485,12 +396,12 @@ public class InvoiceGetResponseDTO {
         public String freightSupplier;
 
         @JsonProperty("IsNotCashDiscountLiable")
-        public boolean isNotCashDiscountLiable;
+        public boolean notCashDiscountLiable;
 
-        @JsonProperty("PurchasingDocumentItemCategory")
+        @JsonProperty(value = "PurchasingDocumentItemCategory", access = Access.WRITE_ONLY)
         public String purchasingDocumentItemCategory;
 
-        @JsonProperty("ProductType")
+        @JsonProperty(value = "ProductType", access = Access.WRITE_ONLY)
         public String productType;
 
         @JsonProperty("RetentionAmountInDocCurrency")
@@ -515,55 +426,60 @@ public class InvoiceGetResponseDTO {
         public String taxCountry;
 
         @JsonProperty("IsFinallyInvoiced")
-        public boolean isFinallyInvoiced;
+        public boolean finallyInvoiced;
 
         @JsonProperty("TaxDeterminationDate")
         public String taxDeterminationDate;
 
         @JsonProperty("IN_HSNOrSACCode")
-        public String iN_HSNOrSACCode;
+        public String in_HSNOrSACCode;
 
         @JsonProperty("IN_CustomDutyAssessableValue")
-        public String iN_CustomDutyAssessableValue;
+        public String in_CustomDutyAssessableValue;
 
         @JsonProperty("NL_ChainLiabilityStartDate")
-        public String nL_ChainLiabilityStartDate;
+        public String nl_ChainLiabilityStartDate;
 
         @JsonProperty("NL_ChainLiabilityEndDate")
-        public String nL_ChainLiabilityEndDate;
+        public String nl_ChainLiabilityEndDate;
 
         @JsonProperty("NL_ChainLiabilityDescription")
-        public String nL_ChainLiabilityDescription;
+        public String nl_ChainLiabilityDescription;
 
         @JsonProperty("NL_ChainLbltyCnstrctnSiteDesc")
-        public String nL_ChainLbltyCnstrctnSiteDesc;
+        public String nl_ChainLbltyCnstrctnSiteDesc;
 
         @JsonProperty("NL_ChainLiabilityDuration")
-        public String nL_ChainLiabilityDuration;
+        public String nl_ChainLiabilityDuration;
 
         @JsonProperty("NL_ChainLiabilityPercent")
-        public String nL_ChainLiabilityPercent;
+        public String nl_ChainLiabilityPercent;
 
-        public ToSupplierInvoiceItmAcctAssgmtGet to_SupplierInvoiceItmAcctAssgmt;
+        public ToSupplierInvoiceItmAcctAssgmt to_SupplierInvoiceItmAcctAssgmt;
     }
 
     @Data
+    @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class ToSupplierInvoiceItmAcctAssgmtGet {
-        public ArrayList<SupplierInvoiceItmAcctAssgmtResultGet> results;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ToSupplierInvoiceItmAcctAssgmt {
+        public ArrayList<SupplierInvoiceItmAcctAssgmtResult> results;
     }
 
     @Data
+    @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class SupplierInvoiceItmAcctAssgmtResultGet {
-        public Metadata __metadata;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class SupplierInvoiceItmAcctAssgmtResult {
 
-        @JsonProperty("SupplierInvoice")
+        @JsonProperty(value = "SupplierInvoice", access = Access.WRITE_ONLY)
         public String supplierInvoice;
 
-        @JsonProperty("FiscalYear")
+        @JsonProperty(value = "FiscalYear", access = Access.WRITE_ONLY)
         public String fiscalYear;
 
         @JsonProperty("SupplierInvoiceItem")
@@ -599,10 +515,10 @@ public class InvoiceGetResponseDTO {
         @JsonProperty("CostObject")
         public String costObject;
 
-        @JsonProperty("CostCtrActivityType")
+        @JsonProperty(value = "CostCtrActivityType", access = Access.WRITE_ONLY)
         public String costCtrActivityType;
 
-        @JsonProperty("BusinessProcess")
+        @JsonProperty(value = "BusinessProcess", access = Access.WRITE_ONLY)
         public String businessProcess;
 
         @JsonProperty("WBSElement")
@@ -638,7 +554,7 @@ public class InvoiceGetResponseDTO {
         @JsonProperty("PersonnelNumber")
         public String personnelNumber;
 
-        @JsonProperty("WorkItem")
+        @JsonProperty(value = "WorkItem", access = Access.WRITE_ONLY)
         public String workItem;
 
         @JsonProperty("MasterFixedAsset")
@@ -647,7 +563,7 @@ public class InvoiceGetResponseDTO {
         @JsonProperty("FixedAsset")
         public String fixedAsset;
 
-        @JsonProperty("DebitCreditCode")
+        @JsonProperty(value = "DebitCreditCode", access = Access.WRITE_ONLY)
         public String debitCreditCode;
 
         @JsonProperty("TaxJurisdiction")
@@ -680,10 +596,10 @@ public class InvoiceGetResponseDTO {
         @JsonProperty("GrantID")
         public String grantID;
 
-        @JsonProperty("PartnerBusinessArea")
+        @JsonProperty(value = "PartnerBusinessArea", access = Access.WRITE_ONLY)
         public String partnerBusinessArea;
 
-        @JsonProperty("CompanyCode")
+        @JsonProperty(value = "CompanyCode", access = Access.WRITE_ONLY)
         public String companyCode;
 
         @JsonProperty("SuplrInvcAccountAssignmentText")
@@ -710,22 +626,23 @@ public class InvoiceGetResponseDTO {
         @JsonProperty("TaxCountry")
         public String taxCountry;
 
-        @JsonProperty("TaxDeterminationDate")
+        @JsonProperty(value = "TaxDeterminationDate", access = Access.WRITE_ONLY)
         public String taxDeterminationDate;
 
     }
 
     @Data
+    @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class SupplierInvoiceTaxResultGet {
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class SupplierInvoiceTaxResult {
 
-        public Metadata __metadata;
-
-        @JsonProperty("SupplierInvoice")
+        @JsonProperty(value = "SupplierInvoice", access = Access.WRITE_ONLY)
         public String supplierInvoice;
 
-        @JsonProperty("FiscalYear")
+        @JsonProperty(value = "FiscalYear", access = Access.WRITE_ONLY)
         public String fiscalYear;
 
         @JsonProperty("TaxCode")
