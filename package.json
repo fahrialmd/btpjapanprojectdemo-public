@@ -5,11 +5,23 @@
   "license": "ISC",
   "repository": "<Add your repository here>",
   "devDependencies": {
-    "@sap/cds-dk": "^9.1.0"
+    "@sap/cds-dk": "^9.1.0",
+    "rimraf": "^5.0.5",
+    "mbt": "^1.2.29"
   },
   "sapux": [
     "app/invoice",
     "app/subcontractporeport"
   ],
-  "dependencies": {}
+  "dependencies": {},
+  "cds": {
+    "requires": {
+      "workzone": true
+    }
+  },
+  "scripts": {
+    "undeploy": "cf undeploy btpjapanprojectdemo --delete-services --delete-service-keys --delete-service-brokers",
+    "build": "rimraf resources mta_archives && mbt build --mtar archive",
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
+  }
 }
