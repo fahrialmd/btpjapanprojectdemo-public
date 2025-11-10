@@ -2,8 +2,6 @@ package customer.btpjapanprojectdemo.model;
 
 import java.util.ArrayList;
 
-import org.springframework.web.service.invoker.HttpRequestValues.Metadata;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
